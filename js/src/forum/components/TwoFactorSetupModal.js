@@ -78,7 +78,7 @@ export default class TwoFactorSetupModal extends Modal {
                         ? m('a', {
                             onclick: () => this.manually = true
                         }, trans('setup_modal.enter_code_manually'))
-                        : m('code', this.state.secret),
+                        : m('p.secret', m('code', this.state.secret)),
                     ]) : null,
                     m('.Form-group', [
                         m('input', {
