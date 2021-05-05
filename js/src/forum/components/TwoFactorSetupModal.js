@@ -3,7 +3,18 @@ import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
 import Modal from 'flarum/common/components/Modal';
 import Stream from 'flarum/common/utils/Stream';
 
-import QRCode from 'qrcode';
+import load from 'external-load';
+
+let loaded = false;
+const addQRCode = async () => {
+    if (loaded) {
+        return;
+    }
+
+    await load.js('https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js');
+
+    loaded = true;
+};
 
 const trans = key => {
     return app.translator.trans(`nearata-twofactor.forum.${key}`);
@@ -62,10 +73,12 @@ export default class TwoFactorSetupModal extends Modal {
                                 m('p', trans('setup_modal.scan_qr')),
                                 m('canvas', {
                                     oncreate: vnode => {
-                                        QRCode.toCanvas(vnode.dom, this.state.qrCode, function (error) {
-                                            if (error) {
-                                                console.error(error);
-                                            }
+                                        addQRCode().then(() => {
+                                            QRCode.toCanvas(vnode.dom, this.state.qrCode, function (error) {
+                                                if (error) {
+                                                    console.error(error);
+                                                }
+                                            });
                                         });
                                     }
                                 })
