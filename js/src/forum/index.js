@@ -7,8 +7,7 @@ import TwoFactorLogInModal from './components/TwoFactorLogInModal';
 import TwoFactorSetupModal from './components/TwoFactorSetupModal';
 import TwoFactorState from './states/TwoFactorState';
 
-
-app.initializers.add('nearata-twofactor', () => {
+app.initializers.add('nearata-twofactor', app => {
     extend(SettingsPage.prototype, 'accountItems', function (items) {
         items.add(
             'nearataTwoFactor',

@@ -1,4 +1,4 @@
-export default class State {
+export default class TwoFactorState {
     constructor() {
         this.loading = false;
         this.enabled = false;

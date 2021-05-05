@@ -5,7 +5,6 @@ import Stream from 'flarum/common/utils/Stream';
 
 import QRCode from 'qrcode';
 
-
 const trans = key => {
     return app.translator.trans(`nearata-twofactor.forum.${key}`);
 };

@@ -2,7 +2,6 @@ import Button from 'flarum/common/components/Button';
 import Modal from 'flarum/common/components/Modal';
 import Stream from 'flarum/common/utils/Stream';
 
-
 const trans = key => {
     return app.translator.trans(`nearata-twofactor.forum.${key}`);
 };
