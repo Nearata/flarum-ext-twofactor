@@ -14,7 +14,6 @@ use OTPHP\TOTP;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-
 class CustomLogInController extends LogInController
 {
     public function handle(Request $request): ResponseInterface
