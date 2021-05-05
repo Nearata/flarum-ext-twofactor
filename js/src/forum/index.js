@@ -19,7 +19,7 @@ app.initializers.add('nearata-twofactor', () => {
             m(Button, {
                 class: 'Button',
                 onclick: () => app.modal.show(TwoFactorSetupModal, { twoFactorState: this.twoFactor })
-            }, 'Two Factor')
+            }, app.translator.trans('nearata-twofactor.forum.setup_button'))
         );
     });
 

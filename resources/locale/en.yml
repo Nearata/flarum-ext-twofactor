@@ -5,6 +5,7 @@ nearata-twofactor:
       submit_button: Log In
       otp_placeholder: "123456"
       title: Two Factor
+    setup_button: Two Factor
     setup_modal:
       close_button: Close
       disabled: Two Factor Disabled.
