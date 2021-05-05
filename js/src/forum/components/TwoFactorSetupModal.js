@@ -19,12 +19,14 @@ export default class TwoFactorSetupModal extends Modal {
 
         this.success = false;
         this.activated = false;
+        this.manually = false;
 
+        this.password = Stream('');
         this.code = Stream('');
     }
 
     className() {
-        return 'TwoFactorModal Modal--small';
+        return 'TwoFactorSetupModal Modal--small';
     }
 
     title() {
@@ -58,6 +60,7 @@ export default class TwoFactorSetupModal extends Modal {
                             this.state.enabled ? [
                                 m('p', trans('setup_modal.enter_code_disable'))
                             ] : [
+                                m('p', trans('setup_modal.scan_qr')),
                                 m('canvas', {
                                     oncreate: vnode => {
                                         QRCode.toCanvas(vnode.dom, this.state.qrCode, function (error) {
@@ -70,14 +73,29 @@ export default class TwoFactorSetupModal extends Modal {
                             ]
                         ]
                     ]),
+                    !this.state.enabled ? m('.Form-group', [
+                        !this.manually
+                        ? m('a', {
+                            onclick: () => this.manually = true
+                        }, trans('setup_modal.enter_code_manually'))
+                        : m('code', this.state.secret),
+                    ]) : null,
                     m('.Form-group', [
-                        m('code.otp-secret', this.state.secret)
+                        m('input', {
+                            class: 'FormControl',
+                            type: 'password',
+                            placeholder: trans('setup_modal.password_placeholder'),
+                            name: 'password',
+                            autocomplete: 'off',
+                            oninput: e => this.password(e.target.value),
+                            disabled: this.loading
+                        })
                     ]),
                     m('.Form-group', [
                         m('input', {
                             class: 'FormControl',
-                            type: 'number',
-                            placeholder: trans('setup_modal.placeholder'),
+                            type: 'text',
+                            placeholder: trans('setup_modal.passcode_placeholder'),
                             name: 'otp',
                             autocomplete: 'off',
                             oninput: e => this.code(e.target.value),
@@ -110,7 +128,7 @@ export default class TwoFactorSetupModal extends Modal {
         app.request({
             url: `${app.forum.attribute('apiUrl')}/twofactor`,
             method: 'PATCH',
-            body: { code: this.code(), secret: this.state.secret },
+            body: { code: this.code(), password: this.password(), secret: this.state.secret },
             errorHandler: this.onerror.bind(this),
         })
         .then(r => {
@@ -123,7 +141,7 @@ export default class TwoFactorSetupModal extends Modal {
 
     onerror(error) {
         if (error.status === 401) {
-            error.alert.content = trans('invalid_twofa_code');
+            error.alert.content = trans('invalid_twofa_setup');
         }
 
         super.onerror(error);

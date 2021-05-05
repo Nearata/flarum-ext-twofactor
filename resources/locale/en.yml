@@ -1,6 +1,7 @@
 nearata-twofactor:
   forum:
     invalid_twofa_code: Invalid two factor code.
+    invalid_twofa_setup: Password or passcode invalid.
     log_in_modal:
       submit_button: Log In
       otp_placeholder: "123456"
@@ -11,7 +12,10 @@ nearata-twofactor:
       disabled: Two Factor Disabled.
       enabled: Two Factor Enabled.
       enter_code_disable: Enter the code to disable Two Factor.
-      placeholder: "123456"
+      enter_code_manually: Enter key manually instead
+      passcode_placeholder: Two Factor Passcode
+      password_placeholder: Password
+      scan_qr: Scan this QR code with your two factor authentication device to set up your account.
       submit_button:
         enable: Enable
         disable: Disable

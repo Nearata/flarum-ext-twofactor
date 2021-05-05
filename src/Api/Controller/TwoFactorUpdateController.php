@@ -24,9 +24,14 @@ class TwoFactorUpdateController implements RequestHandlerInterface
 
         $data = $request->getParsedBody();
         $code = Arr::get($data, 'code');
+        $password = Arr::get($data, 'password');
         $secret = Arr::get($data, 'secret');
 
-        if (is_null($code) || is_null($secret)) {
+        if (is_null($code) || is_null($password) || is_null($secret)) {
+            return new EmptyResponse(401);
+        }
+
+        if (!$actor->checkPassword($password)) {
             return new EmptyResponse(401);
         }
 
