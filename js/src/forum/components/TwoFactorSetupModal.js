@@ -39,8 +39,8 @@ export default class TwoFactorSetupModal extends Modal {
                     m('.Form.Form--centered', [
                         m('p.helpText', [
                             this.activated
-                            ? trans('setup_modal.enabled')
-                            : trans('setup_modal.disabled')
+                                ? trans('setup_modal.enabled')
+                                : trans('setup_modal.disabled')
                         ]),
                         m(Button, {
                             class: 'Button Button--primary Button--block',
@@ -74,10 +74,10 @@ export default class TwoFactorSetupModal extends Modal {
                     ]),
                     !this.state.enabled ? m('.Form-group', [
                         !this.manually
-                        ? m('a', {
-                            onclick: () => this.manually = true
-                        }, trans('setup_modal.enter_code_manually'))
-                        : m('p.secret', m('code', this.state.secret)),
+                            ? m('a', {
+                                onclick: () => this.manually = true
+                            }, trans('setup_modal.enter_code_manually'))
+                            : m('p.secret', m('code', this.state.secret)),
                     ]) : null,
                     m('.Form-group', [
                         m('input', {
@@ -104,13 +104,13 @@ export default class TwoFactorSetupModal extends Modal {
                     m('.Form-group', [
                         Button.component(
                             {
-                              className: 'Button Button--primary Button--block',
-                              type: 'submit',
-                              loading: this.loading,
+                                className: 'Button Button--primary Button--block',
+                                type: 'submit',
+                                loading: this.loading,
                             },
                             this.state.enabled
-                            ? trans('setup_modal.submit_button.disable')
-                            : trans('setup_modal.submit_button.enable')
+                                ? trans('setup_modal.submit_button.disable')
+                                : trans('setup_modal.submit_button.enable')
                         )
                     ])
                 ])
@@ -130,12 +130,12 @@ export default class TwoFactorSetupModal extends Modal {
             body: { code: this.code(), password: this.password(), secret: this.state.secret },
             errorHandler: this.onerror.bind(this),
         })
-        .then(r => {
-            this.activated = r.status;
-            this.success = true;
-        })
-        .catch(() => {})
-        .then(this.loaded.bind(this));
+            .then(r => {
+                this.activated = r.status;
+                this.success = true;
+            })
+            .catch(() => { })
+            .then(this.loaded.bind(this));
     }
 
     onerror(error) {
