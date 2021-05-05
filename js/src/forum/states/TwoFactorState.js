@@ -13,9 +13,9 @@ export default class TwoFactorState {
             url: `${app.forum.attribute('apiUrl')}/twofactor`,
             method: 'GET'
         }).then(r => {
-            this.enabled = r['enabled'];
-            this.qrCode = r['qrCode'];
-            this.secret = r['secret'];
+            this.enabled = r.enabled;
+            this.qrCode = r.qrCode;
+            this.secret = r.secret;
 
             this.loading = false;
             m.redraw();

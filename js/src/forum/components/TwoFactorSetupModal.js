@@ -131,7 +131,7 @@ export default class TwoFactorSetupModal extends Modal {
             errorHandler: this.onerror.bind(this),
         })
         .then(r => {
-            this.activated = r['status'];
+            this.activated = r.status;
             this.success = true;
         })
         .catch(() => {})
