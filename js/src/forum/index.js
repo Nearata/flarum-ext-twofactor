@@ -9,16 +9,12 @@ import TwoFactorState from './states/TwoFactorState';
 
 
 app.initializers.add('nearata-twofactor', () => {
-    extend(SettingsPage.prototype, 'oninit', function () {
-        this.twoFactor = new TwoFactorState();
-    });
-
     extend(SettingsPage.prototype, 'accountItems', function (items) {
         items.add(
             'nearataTwoFactor',
             m(Button, {
                 class: 'Button',
-                onclick: () => app.modal.show(TwoFactorSetupModal, { twoFactorState: this.twoFactor })
+                onclick: () => app.modal.show(TwoFactorSetupModal, { twoFactorState: new TwoFactorState() })
             }, app.translator.trans('nearata-twofactor.forum.setup_button'))
         );
     });
