@@ -1,0 +1,17 @@
+nearata-twofactor:
+  forum:
+    invalid_twofa_code: Invalid two factor code.
+    log_in_modal:
+      submit_button: Log In
+      otp_placeholder: "123456"
+      title: Two Factor
+    setup_modal:
+      close_button: Close
+      disabled: Two Factor Disabled.
+      enabled: Two Factor Enabled.
+      enter_code_disable: Enter the code to disable Two Factor.
+      placeholder: "123456"
+      submit_button:
+        enable: Enable
+        disable: Disable
+      title: Two Factor
