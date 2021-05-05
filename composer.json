@@ -2,7 +2,9 @@
     "name": "nearata/flarum-ext-twofactor",
     "description": "Allow your users to enable two factor authentication.",
     "keywords": [
-        "flarum"
+        "flarum",
+        "twofactor",
+        "security"
     ],
     "type": "flarum-extension",
     "license": "MIT",
