@@ -13,7 +13,8 @@ return [
 
     (new Extend\Routes('api'))
         ->get('/twofactor', 'twofactor.index', Api\Controller\TwoFactorController::class)
-        ->patch('/twofactor', 'twofactor.update', Api\Controller\TwoFactorUpdateController::class),
+        ->patch('/twofactor', 'twofactor.update', Api\Controller\TwoFactorUpdateController::class)
+        ->get('/twofactor/backups', 'twofactor.backups', Api\Controller\TwoFactorBackupsController::class),
 
     (new Extend\Routes('forum'))
         ->remove('POST', 'login')

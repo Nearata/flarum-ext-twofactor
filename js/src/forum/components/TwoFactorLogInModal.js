@@ -34,7 +34,7 @@ export default class TwoFactorLogInModal extends Modal {
                     m('.Form-group', [
                         m('input', {
                             class: 'FormControl',
-                            type: 'number',
+                            type: 'text',
                             placeholder: trans('log_in_modal.otp_placeholder'),
                             name: 'otp',
                             autocomplete: 'off',
@@ -45,9 +45,9 @@ export default class TwoFactorLogInModal extends Modal {
                     m('.Form-group', [
                         Button.component(
                             {
-                              className: 'Button Button--primary Button--block',
-                              type: 'submit',
-                              loading: this.loading,
+                                className: 'Button Button--primary Button--block',
+                                type: 'submit',
+                                loading: this.loading,
                             },
                             trans('log_in_modal.submit_button')
                         )

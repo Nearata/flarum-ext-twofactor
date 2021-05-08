@@ -22,7 +22,7 @@ php flarum migrate
 
 ## Remove
 
-Disable the extension, click uninstall and run these command:
+Disable the extension, click uninstall and run these commands:
 
 ```sh
 composer remove nearata/flarum-ext-twofactor

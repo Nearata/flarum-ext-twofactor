@@ -3,6 +3,7 @@ import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
 import Modal from 'flarum/common/components/Modal';
 import Stream from 'flarum/common/utils/Stream';
 
+import copy from 'copy-text-to-clipboard';
 import load from 'external-load';
 
 let loaded = false;
@@ -16,9 +17,30 @@ const addQRCode = async () => {
     loaded = true;
 };
 
-const trans = key => {
-    return app.translator.trans(`nearata-twofactor.forum.${key}`);
+const trans = (key, options = {}) => {
+    return app.translator.trans(`nearata-twofactor.forum.${key}`, options);
 };
+
+const download = codes => {
+    const text = trans('setup_modal.backups.download_file_format', {
+        url: `${app.forum.attribute('title')} - ${app.forum.attribute('baseUrl')}`,
+        codes: codes.join('\n'),
+        date: window.dayjs().format('ll')
+    });
+    const mimeType = 'text/plain';
+    const blob = new Blob(text, { type: mimeType });
+
+    const anchor = document.createElement('a');
+    anchor.download = 'twofactor_recovery_codes.txt';
+    anchor.href = URL.createObjectURL(blob);
+    anchor.dataset.downloadurl = [mimeType, anchor.download, anchor.href].join(':');
+    anchor.style.display = "none";
+    document.body.appendChild(anchor);
+
+    anchor.click();
+    document.body.removeChild(anchor);
+    setTimeout(() => URL.revokeObjectURL(anchor.href), 1500);
+}
 
 export default class TwoFactorSetupModal extends Modal {
     oninit(vnode) {
@@ -28,7 +50,7 @@ export default class TwoFactorSetupModal extends Modal {
         this.state.refresh();
 
         this.success = false;
-        this.activated = false;
+        this.enabled = false;
         this.manually = false;
 
         this.password = Stream('');
@@ -49,15 +71,35 @@ export default class TwoFactorSetupModal extends Modal {
                 m('.Modal-body', [
                     m('.Form.Form--centered', [
                         m('p.helpText', [
-                            this.activated
+                            this.enabled
                                 ? trans('setup_modal.enabled')
                                 : trans('setup_modal.disabled')
                         ]),
-                        m(Button, {
-                            class: 'Button Button--primary Button--block',
-                            onclick: this.hide.bind(this)
-                        }, trans('setup_modal.close_button'))
+                        this.enabled ? [
+                            m('p.message', trans('setup_modal.backups.modal_message')),
+                            this.state.loading ? m(LoadingIndicator) : [
+                                m('ol.backups', this.state.backups.map(code => {
+                                    return m('li', code);
+                                }))
+                            ],
+                            m('.exportbackups', [
+                                m(Button, {
+                                    class: 'Button Button--primary Button--block',
+                                    onclick: () => download(this.state.backups)
+                                }, trans('setup_modal.backups.download_button')),
+                                m(Button, {
+                                    class: 'Button Button--primary Button--block',
+                                    onclick: () => copy(this.state.backups.join('\n'))
+                                }, trans('setup_modal.backups.copy_button'))
+                            ])
+                        ] : null
                     ])
+                ]),
+                m('.Modal-footer', [
+                    m(Button, {
+                        class: 'Button Button--primary Button--block',
+                        onclick: this.hide.bind(this)
+                    }, trans('setup_modal.close_button'))
                 ])
             ];
         }
@@ -66,31 +108,33 @@ export default class TwoFactorSetupModal extends Modal {
             m('.Modal-body', [
                 m('.Form.Form--centered', [
                     m('.Form-group', [
-                        this.state.loading ? m(LoadingIndicator) : [
-                            this.state.enabled ? [
-                                m('p', trans('setup_modal.enter_code_disable'))
-                            ] : [
-                                m('p', trans('setup_modal.scan_qr')),
-                                m('canvas', {
-                                    oncreate: vnode => {
-                                        addQRCode().then(() => {
-                                            QRCode.toCanvas(vnode.dom, this.state.qrCode, function (error) {
-                                                if (error) {
-                                                    console.error(error);
-                                                }
+                        this.state.loading
+                            ? m(LoadingIndicator)
+                            : [
+                                this.state.enabled ? [
+                                    m('p', trans('setup_modal.enter_code_disable'))
+                                ] : [
+                                    m('p', trans('setup_modal.scan_qr')),
+                                    m('canvas', {
+                                        oncreate: vnode => {
+                                            addQRCode().then(() => {
+                                                QRCode.toCanvas(vnode.dom, this.state.qrCode, function (error) {
+                                                    if (error) {
+                                                        console.error(error);
+                                                    }
+                                                });
                                             });
-                                        });
-                                    }
-                                })
+                                        }
+                                    })
+                                ]
                             ]
-                        ]
                     ]),
                     !this.state.enabled ? m('.Form-group', [
                         !this.manually
                             ? m('a', {
                                 onclick: () => this.manually = true
                             }, trans('setup_modal.enter_code_manually'))
-                            : m('p.secret', m('code', this.state.secret)),
+                            : m('p.message', m('code', this.state.secret)),
                     ]) : null,
                     m('.Form-group', [
                         m('input', {
@@ -144,8 +188,12 @@ export default class TwoFactorSetupModal extends Modal {
             errorHandler: this.onerror.bind(this),
         })
             .then(r => {
-                this.activated = r.status;
+                this.enabled = r.enabled;
                 this.success = true;
+
+                if (r.enabled) {
+                    this.state.generateBackups();
+                }
             })
             .catch(() => { })
             .then(this.loaded.bind(this));

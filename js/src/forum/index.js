@@ -1,5 +1,5 @@
 import { extend } from 'flarum/common/extend';
-import app from 'flarum/forum/app';
+import app from 'flarum/app';
 import Button from 'flarum/common/components/Button';
 import LogInModal from 'flarum/forum/components/LogInModal';
 import SettingsPage from 'flarum/forum/components/SettingsPage';

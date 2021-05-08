@@ -10,13 +10,14 @@ use Flarum\User\Event\LoggedIn;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
+use Nearata\TwoFactor\Helpers;
 use OTPHP\TOTP;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ServerRequestInterface;
 
 class CustomLogInController extends LogInController
 {
-    public function handle(Request $request): ResponseInterface
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $actor = $request->getAttribute('actor');
         $body = $request->getParsedBody();
@@ -37,7 +38,7 @@ class CustomLogInController extends LogInController
                 }
 
                 $otp = TOTP::create($user->twofa_secret);
-                if (!$otp->verify($code)) {
+                if (!$otp->verify($code) && !Helpers::isBackupCode($user, $code)) {
                     return new EmptyResponse(401);
                 }
             }

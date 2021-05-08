@@ -2,10 +2,10 @@
 
 namespace Nearata\TwoFactor\Api\Controller;
 
-use Flarum\Foundation\ValidationException;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
+use Nearata\TwoFactor\Helpers;
 use OTPHP\TOTP;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -40,13 +40,14 @@ class TwoFactorUpdateController implements RequestHandlerInterface
 
         $otp = TOTP::create($secret);
 
-        if (!$otp->verify($code)) {
+        if (!$otp->verify($code) && !Helpers::isBackupCode($actor, $code)) {
             return new EmptyResponse(401);
         }
 
         if ($actor->twofa_active) {
             $actor->twofa_active = false;
             $actor->twofa_secret = '';
+            $actor->twofa_codes = '';
         } else {
             $actor->twofa_active = true;
             $actor->twofa_secret = $secret;
@@ -54,6 +55,6 @@ class TwoFactorUpdateController implements RequestHandlerInterface
 
         $actor->save();
 
-        return new JsonResponse(['status' => $actor->twofa_active]);
+        return new JsonResponse(['enabled' => $actor->twofa_active]);
     }
 }
