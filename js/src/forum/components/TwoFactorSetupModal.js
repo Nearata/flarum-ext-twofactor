@@ -78,11 +78,11 @@ export default class TwoFactorSetupModal extends Modal {
                         this.enabled ? [
                             m('p.message', trans('setup_modal.backups.modal_message')),
                             this.state.loading ? m(LoadingIndicator) : [
-                                m('ol.backups', this.state.backups.map(code => {
-                                    return m('li', code);
+                                m('ol.Backups-list', this.state.backups.map(code => {
+                                    return m('li.Backups-item', code);
                                 }))
                             ],
-                            m('.exportbackups', [
+                            m('.Backups-export', [
                                 m(Button, {
                                     class: 'Button Button--primary Button--block',
                                     onclick: () => download(this.state.backups)
@@ -115,7 +115,7 @@ export default class TwoFactorSetupModal extends Modal {
                                     m('p', trans('setup_modal.enter_code_disable'))
                                 ] : [
                                     m('p', trans('setup_modal.scan_qr')),
-                                    m('canvas', {
+                                    m('canvas.QRCode', {
                                         oncreate: vnode => {
                                             addQRCode().then(() => {
                                                 QRCode.toCanvas(vnode.dom, this.state.qrCode, function (error) {
@@ -143,7 +143,7 @@ export default class TwoFactorSetupModal extends Modal {
                             placeholder: trans('setup_modal.password_placeholder'),
                             name: 'password',
                             autocomplete: 'off',
-                            oninput: e => this.password(e.target.value),
+                            bidi: this.password,
                             disabled: this.loading
                         })
                     ]),
@@ -154,7 +154,7 @@ export default class TwoFactorSetupModal extends Modal {
                             placeholder: trans('setup_modal.passcode_placeholder'),
                             name: 'otp',
                             autocomplete: 'off',
-                            oninput: e => this.code(e.target.value),
+                            bidi: this.code,
                             disabled: this.loading
                         })
                     ]),

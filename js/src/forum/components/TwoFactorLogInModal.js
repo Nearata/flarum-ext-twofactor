@@ -38,7 +38,7 @@ export default class TwoFactorLogInModal extends Modal {
                             placeholder: trans('log_in_modal.otp_placeholder'),
                             name: 'otp',
                             autocomplete: 'off',
-                            oninput: e => this.code(e.target.value),
+                            bidi: this.code,
                             disabled: this.loading
                         })
                     ]),
