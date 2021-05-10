@@ -1,4 +1,7 @@
 nearata-twofactor:
+  admin:
+    settings:
+      generate_backups: Generate backup codes.
   forum:
     invalid_twofa_code: Invalid two factor code.
     invalid_twofa_setup: Password or passcode invalid.

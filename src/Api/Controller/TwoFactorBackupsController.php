@@ -2,6 +2,7 @@
 
 namespace Nearata\TwoFactor\Api\Controller;
 
+use Flarum\Settings\SettingsRepositoryInterface;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -10,12 +11,25 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class TwoFactorBackupsController implements RequestHandlerInterface
 {
+    protected $settings;
+
+    public function __construct(SettingsRepositoryInterface $settings)
+    {
+        $this->settings = $settings;
+    }
+
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $actor = $request->getAttribute('actor');
 
         if ($actor->isGuest()) {
             return new EmptyResponse(403);
+        }
+
+        $canGenerate = $this->settings->get('nearata-twofactor.admin.generate_backups', false);
+
+        if (!$canGenerate) {
+            return new EmptyResponse(401);
         }
 
         if (!$actor->twofa_active) {

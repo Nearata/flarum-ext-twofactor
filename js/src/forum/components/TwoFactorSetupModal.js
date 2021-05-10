@@ -55,6 +55,8 @@ export default class TwoFactorSetupModal extends Modal {
 
         this.password = Stream('');
         this.code = Stream('');
+
+        this.canGenerateBackups = app.forum.attribute('canGenerateBackups');
     }
 
     className() {
@@ -75,7 +77,7 @@ export default class TwoFactorSetupModal extends Modal {
                                 ? trans('setup_modal.enabled')
                                 : trans('setup_modal.disabled')
                         ]),
-                        this.enabled ? [
+                        this.canGenerateBackups && this.enabled ? [
                             m('p.message', trans('setup_modal.backups.modal_message')),
                             this.state.loading ? m(LoadingIndicator) : [
                                 m('ol.Backups-list', this.state.backups.map(code => {
@@ -191,7 +193,7 @@ export default class TwoFactorSetupModal extends Modal {
                 this.enabled = r.enabled;
                 this.success = true;
 
-                if (r.enabled) {
+                if (this.canGenerateBackups && r.enabled) {
                     this.state.generateBackups();
                 }
             })
