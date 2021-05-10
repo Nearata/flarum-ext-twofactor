@@ -2,10 +2,6 @@
 
 > A [Flarum](http://flarum.org) extension. Allow your users to enable two factor authentication.
 
-## WARNING
-
-Not ready for production.
-
 ## Install
 
 ```sh
