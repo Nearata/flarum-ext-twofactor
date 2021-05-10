@@ -2,6 +2,8 @@
 
 > A [Flarum](http://flarum.org) extension. Allow your users to enable two factor authentication.
 
+[Imgur](https://imgur.com/a/FMnO5rn)
+
 ## Install
 
 ```sh
