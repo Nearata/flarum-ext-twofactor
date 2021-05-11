@@ -15,7 +15,7 @@ nearata-twofactor:
         copy_button: Copy
         download_button: Download
         download_file_format: |
-          {url}
+          {website_title} | {website_url}
 
           Keep these backup codes somewhere safe but accessible.
 

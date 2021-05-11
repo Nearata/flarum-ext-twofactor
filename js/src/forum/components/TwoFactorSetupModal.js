@@ -23,7 +23,8 @@ const trans = (key, options = {}) => {
 
 const download = codes => {
     const text = trans('setup_modal.backups.download_file_format', {
-        url: `${app.forum.attribute('title')} - ${app.forum.attribute('baseUrl')}`,
+        website_title: app.forum.attribute('title'),
+        website_url: app.forum.attribute('baseUrl'),
         codes: codes.join('\n'),
         date: window.dayjs().format('ll')
     });
