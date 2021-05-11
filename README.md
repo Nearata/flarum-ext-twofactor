@@ -4,7 +4,10 @@
 
 [Imgur](https://imgur.com/a/FMnO5rn)
 
-Note: to allow the generation of backup codes, you must enable it in the admin settings of the extension.
+## Note
+
+- To allow the generation of backup codes, you must enable it in the admin settings of the extension.
+- Users can't use API if they have two factor enabled.
 
 ## Install
 
