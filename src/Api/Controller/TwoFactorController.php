@@ -2,7 +2,7 @@
 
 namespace Nearata\TwoFactor\Api\Controller;
 
-use Flarum\Http\UrlGenerator;
+use Flarum\Foundation\Config;
 use Illuminate\Support\Str;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -13,6 +13,13 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class TwoFactorController implements RequestHandlerInterface
 {
+    protected $config;
+
+    public function __construct(Config $config)
+    {
+        $this->config = $config;
+    }
+
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $actor = $request->getAttribute('actor');
@@ -33,19 +40,10 @@ class TwoFactorController implements RequestHandlerInterface
             $payload['secret'] = $otp->getSecret();
 
             $otp->setLabel($actor->username);
-            $otp->setIssuer($this->getUrl());
+            $otp->setIssuer($this->config->url()->getHost());
             $payload['qrCode'] = $otp->getProvisioningUri();
         }
 
         return new JsonResponse($payload);
-    }
-
-    private function getUrl(): string
-    {
-        $baseUrl = resolve(UrlGenerator::class)
-            ->to('forum')
-            ->base();
-
-        return Str::of($baseUrl)->replaceMatches('/http(s?):\/\//', '');
     }
 }
