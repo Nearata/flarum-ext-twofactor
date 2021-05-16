@@ -1,0 +1,44 @@
+nearata-twofactor:
+  admin:
+    settings:
+      generate_backups: Yedek kodlar oluştur.
+  forum:
+    invalid_twofa_code: Geçersiz iki adımlı doğrulama kodu.
+    invalid_twofa_setup: Şifre geçersiz.
+    log_in_modal:
+      submit_button: Giriş Yap
+      otp_placeholder: İki Adımlı Doğrulama Kodu
+      title: İki Adımlı Doğrulama
+    setup_button: İki Adımlı Doğrulama
+    setup_modal:
+      backups:
+        copy_button: Kopyala
+        download_button: İndir
+        download_file_format: |
+          {website_title} | {website_url}
+
+          Bu kodları güvenli ama kolay erişilebilen bir yerde tutun.
+
+          YEDEK KOD LİSTESİ
+
+          {codes}
+
+          * Her kodu yalnızca bir kere kullanabilirsiniz.
+          * Bu kodları SIRASINA göre kullanın.
+          * Bu kodlar {date} tarihinde oluşturuldu.
+        modal_message: >
+          Kurtarma kodlarını güvenli bir yerde saklayın. Eğer iki adımlı
+          doğrulama cihazınızı kaybederseniz, tek kullanımlık kod
+          listedeki sırasına göre hesabınıza giriş yapmak için kullanılabilir.
+      close_button: Kapat
+      disabled: İki Adımlı Doğrulama devre dışı.
+      enabled: İki Adımlı Doğrulama aktif.
+      enter_code_disable: İki Adımlı Doğrulama'yı devre dışı bırakmak için lütfen kodunuzu girin.
+      enter_code_manually: Kodu manuel olarak gir
+      passcode_placeholder: İki Adımlı Doğrulama Kodu
+      password_placeholder: Şifre
+      scan_qr: Hesabınızı oluşturmak için bu QR kodunu iki adımlı doğrulama uygulamanızdan tarayın.
+      submit_button:
+        enable: Aktif et
+        disable: Devre dışı bırak
+      title: İki Adımlı Doğrulama
