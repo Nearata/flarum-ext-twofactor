@@ -1,5 +1,7 @@
 # Two Factor
 
+![supports](https://flarum-badge-api.davwheat.dev/v1/compat-latest/nearata/flarum-ext-twofactor)
+
 > A [Flarum](http://flarum.org) extension. Allow your users to enable two factor authentication.
 
 [Imgur](https://imgur.com/a/FMnO5rn)
