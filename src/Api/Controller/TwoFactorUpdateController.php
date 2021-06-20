@@ -40,7 +40,7 @@ class TwoFactorUpdateController implements RequestHandlerInterface
 
         $otp = TOTP::create($secret);
 
-        if (!$otp->verify($code) && !Helpers::isBackupCode($actor, $code)) {
+        if (!$otp->verify($code) && ($actor->twofa_active && !Helpers::isBackupCode($actor, $code))) {
             return new EmptyResponse(401);
         }
 

@@ -19,11 +19,10 @@ class CustomLogInController extends LogInController
 {
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $actor = $request->getAttribute('actor');
         $body = $request->getParsedBody();
         $params = Arr::only($body, ['identification', 'password', 'remember']);
 
-        $response = $this->apiClient->send(CreateTokenController::class, $actor, [], $params);
+        $response = $this->apiClient->withParentRequest($request)->withBody($params)->post('/token');
 
         if ($response->getStatusCode() === 200) {
             $data = json_decode($response->getBody());

@@ -3,6 +3,7 @@
 namespace Nearata\TwoFactor\Api\Controller;
 
 use Flarum\Foundation\Config;
+use Flarum\Http\RequestUtil;
 use Illuminate\Support\Str;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -22,7 +23,7 @@ class TwoFactorController implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $actor = $request->getAttribute('actor');
+        $actor = RequestUtil::getActor($request);
 
         if ($actor->isGuest()) {
             return new EmptyResponse(403);

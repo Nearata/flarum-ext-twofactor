@@ -21,8 +21,11 @@ class AuthenticateWithTwoFactor implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $body = $request->getParsedBody();
+        if ($request->getAttribute('routeName') === 'token') {
+            return $handler->handle($request);
+        }
 
+        $body = $request->getParsedBody();
         $identification = Arr::get($body, 'identification');
 
         $user = $this->users->findByIdentification($identification);

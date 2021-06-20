@@ -2,6 +2,7 @@
 
 namespace Nearata\TwoFactor\Api\Controller;
 
+use Flarum\Http\RequestUtil;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -20,7 +21,7 @@ class TwoFactorBackupsController implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $actor = $request->getAttribute('actor');
+        $actor = RequestUtil::getActor($request);
 
         if ($actor->isGuest()) {
             return new EmptyResponse(403);

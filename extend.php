@@ -25,7 +25,7 @@ return [
         ->get('/twofactor/backups', 'twofactor.backups', TwoFactorBackupsController::class),
 
     (new Extend\Routes('forum'))
-        ->remove('POST', 'login')
+        ->remove('login')
         ->post('/login', 'login', CustomLogInController::class),
 
     (new Extend\Settings())
