@@ -21,15 +21,9 @@ const trans = (key, options = {}) => {
     return app.translator.trans(`nearata-twofactor.forum.${key}`, options);
 };
 
-const download = codes => {
-    const text = trans('setup_modal.backups.download_file_format', {
-        website_title: app.forum.attribute('title'),
-        website_url: app.forum.attribute('baseUrl'),
-        codes: codes.join('\n'),
-        date: window.dayjs().format('ll')
-    });
+const download = text => {
     const mimeType = 'text/plain';
-    const blob = new Blob(text, { type: mimeType });
+    const blob = new Blob([text], { type: mimeType });
 
     const anchor = document.createElement('a');
     anchor.download = 'twofactor_recovery_codes.txt';
@@ -86,9 +80,19 @@ export default class TwoFactorSetupModal extends Modal {
                                 }))
                             ],
                             m('.Backups-export', [
+                                m("div.Backup-codes", {
+                                    "style": "display:none;"
+                                }, [
+                                    trans('setup_modal.backups.download_file_format', {
+                                        website_title: app.forum.attribute('title'),
+                                        website_url: app.forum.attribute('baseUrl'),
+                                        codes: this.state.backups.join('\n'),
+                                        date: window.dayjs().format('ll')
+                                    })
+                                ]),
                                 m(Button, {
                                     class: 'Button Button--primary Button--block',
-                                    onclick: () => download(this.state.backups)
+                                    onclick: event => download(event.target.previousSibling.textContent)
                                 }, trans('setup_modal.backups.download_button')),
                                 m(Button, {
                                     class: 'Button Button--primary Button--block',
@@ -162,15 +166,13 @@ export default class TwoFactorSetupModal extends Modal {
                         })
                     ]),
                     m('.Form-group', [
-                        Button.component(
-                            {
-                                className: 'Button Button--primary Button--block',
-                                type: 'submit',
-                                loading: this.loading,
-                            },
-                            this.state.enabled
-                                ? trans('setup_modal.submit_button.disable')
-                                : trans('setup_modal.submit_button.enable')
+                        m(Button, {
+                            class: 'Button Button--primary Button--block',
+                            type: 'submit',
+                            loading: this.loading,
+                        }, this.state.enabled
+                            ? trans('setup_modal.submit_button.disable')
+                            : trans('setup_modal.submit_button.enable')
                         )
                     ])
                 ])
