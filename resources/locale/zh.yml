@@ -1,0 +1,45 @@
+nearata-twofactor:
+  admin:
+    settings:
+      generate_backups: 生成备份代码
+  forum:
+    invalid_twofa_code: 无效的双重验证代码
+    invalid_twofa_setup: 密码或验证密码无效
+    log_in_modal:
+      submit_button: 登录
+      otp_placeholder: 双重验证密码
+      title: 双重验证
+    setup_button: 双重验证
+    setup_modal:
+      backups:
+        copy_button: 复制
+        download_button: 下载
+        download_file_format: |
+          {website_title} | {website_url}
+
+          Keep these backup codes somewhere safe but accessible.
+          请妥善保管好备份代码！
+          LIST OF CODES
+
+          {codes}
+
+          * You can only use each backup code once.
+          * 每个代码你仅可使用一次
+          * These codes MUST be used in the listed order.
+          * 这些代码必须按照顺序使用
+          * These codes were generated on: {date}.
+          * 本代码于 {date} 生成
+        modal_message: >
+          请妥善保管好恢复代码，如果你丢失了启用双重验证的设备，这些一次性的代码可以通过按照顺序使用来登录帐号
+      close_button: 关闭
+      disabled: 双重验证已禁用
+      enabled: 双重验证已启用
+      enter_code_disable: 输入代码来禁用
+      enter_code_manually: 手动输入密钥
+      passcode_placeholder: 双重验证密码
+      password_placeholder: 密码
+      scan_qr: 使用双重验证设备扫描二维码来启用帐号的双重验证
+      submit_button:
+        enable: 启用
+        disable: 禁用
+      title: 双重验证
