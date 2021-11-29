@@ -34,6 +34,6 @@ composer remove nearata/flarum-ext-twofactor
 php flarum cache:clear
 ```
 
-## License
+## Unlicense
 
-Distributed under the MIT license. See [LICENSE](LICENSE) for details.
+See [UNLICENSE](UNLICENSE) for details.
