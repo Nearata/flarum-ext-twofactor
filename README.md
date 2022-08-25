@@ -21,3 +21,7 @@ Disable the extension, click uninstall and run these commands:
 composer remove nearata/flarum-ext-twofactor
 php flarum cache:clear
 ```
+
+## How to use
+
+Go to `User Settings` -> `Two Factor` button -> follow the screen
