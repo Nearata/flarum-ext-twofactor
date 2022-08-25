@@ -7,15 +7,15 @@
         "security"
     ],
     "type": "flarum-extension",
-    "license": "MIT",
+    "license": "Unlicense",
     "require": {
-        "flarum/core": "^1.0.0",
-        "spomky-labs/otphp": "^10.0.1"
+        "flarum/core": "1.4.1",
+        "spomky-labs/otphp": "^10.0.3|^11.0.0"
     },
     "authors": [
         {
             "name": "Nearata",
-            "email": "williamdicicco@protonmail.com",
+            "email": "nearata@protonmail.com",
             "role": "Developer"
         }
     ],

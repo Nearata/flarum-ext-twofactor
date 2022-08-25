@@ -10,6 +10,10 @@ class Helpers
     {
         $backups = json_decode($user->twofa_codes);
 
+        if (is_null($backups)) {
+            return false;
+        }
+
         if (count($backups) === 0) {
             return false;
         }

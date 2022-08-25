@@ -27,7 +27,7 @@ class TwoFactorBackupsController implements RequestHandlerInterface
             return new EmptyResponse(403);
         }
 
-        $canGenerate = $this->settings->get('nearata-twofactor.admin.generate_backups', false);
+        $canGenerate = $this->settings->get('nearata-twofactor.admin.generate_backups');
 
         if (!$canGenerate) {
             return new EmptyResponse(401);
@@ -48,6 +48,7 @@ class TwoFactorBackupsController implements RequestHandlerInterface
         for($i = 0; $i < 16; $i++) {
             $bytes = random_bytes(4);
             $hex = bin2hex($bytes);
+
             array_push($newBackups, $hex);
         }
 

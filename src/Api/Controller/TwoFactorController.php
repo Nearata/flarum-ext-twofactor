@@ -4,7 +4,6 @@ namespace Nearata\TwoFactor\Api\Controller;
 
 use Flarum\Foundation\Config;
 use Flarum\Http\RequestUtil;
-use Illuminate\Support\Str;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use OTPHP\TOTP;

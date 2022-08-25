@@ -29,7 +29,7 @@ return [
         ->post('/login', 'login', CustomLogInController::class),
 
     (new Extend\Settings())
-        ->serializeToForum('canGenerateBackups', 'nearata-twofactor.admin.generate_backups', 'boolval', false),
+        ->serializeToForum('canGenerateBackups', 'nearata-twofactor.admin.generate_backups', 'boolval'),
 
     (new Extend\Middleware('api'))
         ->add(AuthenticateWithTwoFactor::class)
