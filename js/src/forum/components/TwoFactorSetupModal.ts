@@ -25,6 +25,7 @@ const addResources = async () => {
     await load.js(
         "https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"
     );
+
     await load.js(
         "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"
     );
@@ -37,6 +38,8 @@ const trans = (key: string, options = {}) => {
 };
 
 export default class TwoFactorSetupModal extends Modal<Attrs> {
+    isDismissible = false;
+
     twoFactorState!: TwoFactorState;
     success!: boolean;
     enabled!: boolean;
@@ -70,6 +73,10 @@ export default class TwoFactorSetupModal extends Modal<Attrs> {
     }
 
     content() {
+        if (this.twoFactorState.loading) {
+            return m(LoadingIndicator);
+        }
+
         if (this.success) {
             return [
                 m(".Modal-body", [
@@ -80,83 +87,7 @@ export default class TwoFactorSetupModal extends Modal<Attrs> {
                                 : trans("setup_modal.disabled"),
                         ]),
                         this.canGenerateBackups && this.enabled
-                            ? [
-                                  m(
-                                      "p.message",
-                                      trans("setup_modal.backups.modal_message")
-                                  ),
-                                  this.twoFactorState.loading
-                                      ? m(LoadingIndicator)
-                                      : [
-                                            m(
-                                                "ol.Backups-list",
-                                                this.twoFactorState.backups.map(
-                                                    (code) => {
-                                                        return m(
-                                                            "li.Backups-item",
-                                                            code
-                                                        );
-                                                    }
-                                                )
-                                            ),
-                                        ],
-                                  m(".Backups-export", [
-                                      m(
-                                          Button,
-                                          {
-                                              class: "Button Button--primary Button--block",
-                                              onclick: (_: any) => {
-                                                  const text = trans(
-                                                      "setup_modal.backups.download_file_format",
-                                                      {
-                                                          website_title:
-                                                              app.forum.attribute(
-                                                                  "title"
-                                                              ),
-                                                          website_url:
-                                                              app.forum.attribute(
-                                                                  "baseUrl"
-                                                              ),
-                                                          codes: this.twoFactorState.backups.join(
-                                                              "\n"
-                                                          ),
-                                                          date: window
-                                                              .dayjs()
-                                                              .format("ll"),
-                                                      }
-                                                  );
-
-                                                  const blob = new Blob(text, {
-                                                      type: "text/plain;charset=utf-8",
-                                                  });
-
-                                                  saveAs(
-                                                      blob,
-                                                      "twofactor_recovery_codes.txt"
-                                                  );
-                                              },
-                                          },
-                                          trans(
-                                              "setup_modal.backups.download_button"
-                                          )
-                                      ),
-                                      m(
-                                          Button,
-                                          {
-                                              class: "Button Button--primary Button--block",
-                                              onclick: (_: any) =>
-                                                  navigator.clipboard.writeText(
-                                                      this.twoFactorState.backups.join(
-                                                          "\n"
-                                                      )
-                                                  ),
-                                          },
-                                          trans(
-                                              "setup_modal.backups.copy_button"
-                                          )
-                                      ),
-                                  ]),
-                              ]
+                            ? this.backupContent()
                             : null,
                     ]),
                 ]),
@@ -177,69 +108,10 @@ export default class TwoFactorSetupModal extends Modal<Attrs> {
             m(".Modal-body", [
                 m(".Form.Form--centered", [
                     m(".Form-group", [
-                        this.twoFactorState.loading
-                            ? m(LoadingIndicator)
-                            : [
-                                  this.twoFactorState.enabled
-                                      ? [
-                                            m(
-                                                "p",
-                                                trans(
-                                                    "setup_modal.enter_code_disable"
-                                                )
-                                            ),
-                                        ]
-                                      : [
-                                            m(
-                                                "p",
-                                                trans("setup_modal.scan_qr")
-                                            ),
-                                            m("canvas.QRCode", {
-                                                oncreate: async (
-                                                    vnode: any
-                                                ) => {
-                                                    await addResources().then(
-                                                        () => {
-                                                            // @ts-ignore
-                                                            QRCode.toCanvas(
-                                                                vnode.dom,
-                                                                this
-                                                                    .twoFactorState
-                                                                    .qrCode,
-                                                                function (
-                                                                    error
-                                                                ) {
-                                                                    if (error) {
-                                                                        console.error(
-                                                                            error
-                                                                        );
-                                                                    }
-                                                                }
-                                                            );
-                                                        }
-                                                    );
-                                                },
-                                            }),
-                                        ],
-                              ],
+                        this.twoFactorState.enabled
+                            ? m("p", trans("setup_modal.enter_code_disable"))
+                            : this.qrcodeContent(),
                     ]),
-                    !this.twoFactorState.enabled
-                        ? m(".Form-group", [
-                              !this.manually
-                                  ? m(
-                                        "a",
-                                        {
-                                            onclick: () =>
-                                                (this.manually = true),
-                                        },
-                                        trans("setup_modal.enter_code_manually")
-                                    )
-                                  : m(
-                                        "p.message",
-                                        m("code", this.twoFactorState.secret)
-                                    ),
-                          ])
-                        : null,
                     m(".Form-group", [
                         m("input", {
                             class: "FormControl",
@@ -281,6 +153,93 @@ export default class TwoFactorSetupModal extends Modal<Attrs> {
                     ]),
                 ]),
             ]),
+        ];
+    }
+
+    backupContent() {
+        return [
+            m("p.message", trans("setup_modal.backups.modal_message")),
+            m("ol.Backups-list", [
+                this.twoFactorState.backups.map((code) => {
+                    return m("li.Backups-item", code);
+                }),
+            ]),
+            m(".Backups-export", [
+                m(
+                    Button,
+                    {
+                        class: "Button Button--primary Button--block",
+                        onclick: (_: any) => {
+                            const title = app.forum.attribute("title");
+                            const baseUrl = app.forum.attribute("baseUrl");
+                            const backupCodes =
+                                this.twoFactorState.backups.join("\n");
+
+                            const text = trans(
+                                "setup_modal.backups.download_file_format",
+                                {
+                                    website_title: title,
+                                    website_url: baseUrl,
+                                    codes: backupCodes,
+                                    date: window.dayjs().format("ll"),
+                                }
+                            );
+
+                            const blob = new Blob(text, {
+                                type: "text/plain;charset=utf-8",
+                            });
+
+                            saveAs(blob, "twofactor_recovery_codes.txt");
+                        },
+                    },
+                    trans("setup_modal.backups.download_button")
+                ),
+                m(
+                    Button,
+                    {
+                        class: "Button Button--primary Button--block",
+                        onclick: (_: any) => {
+                            navigator.clipboard.writeText(
+                                this.twoFactorState.backups.join("\n")
+                            );
+                        },
+                    },
+                    trans("setup_modal.backups.copy_button")
+                ),
+            ]),
+        ];
+    }
+
+    qrcodeContent() {
+        return [
+            m("p", trans("setup_modal.scan_qr")),
+            m("p", [
+                m("canvas.QRCode", {
+                    oncreate: async (vnode: any) => {
+                        await addResources().then(() => {
+                            // @ts-ignore
+                            QRCode.toCanvas(
+                                vnode.dom,
+                                this.twoFactorState.qrCode,
+                                function (error) {
+                                    if (error) {
+                                        console.error(error);
+                                    }
+                                }
+                            );
+                        });
+                    },
+                }),
+            ]),
+            this.manually
+                ? m("p.message", [m("code", this.twoFactorState.secret)])
+                : m(
+                      "a",
+                      {
+                          onclick: () => (this.manually = true),
+                      },
+                      trans("setup_modal.enter_code_manually")
+                  ),
         ];
     }
 
