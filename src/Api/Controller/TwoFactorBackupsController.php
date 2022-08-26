@@ -27,6 +27,10 @@ class TwoFactorBackupsController implements RequestHandlerInterface
             return new EmptyResponse(403);
         }
 
+        if (!$actor->can("nearata-twofactor.enable")) {
+            return new EmptyResponse(403);
+        }
+
         $canGenerate = $this->settings->get('nearata-twofactor.admin.generate_backups');
 
         if (!$canGenerate) {

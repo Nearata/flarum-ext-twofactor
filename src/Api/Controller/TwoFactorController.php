@@ -29,6 +29,7 @@ class TwoFactorController implements RequestHandlerInterface
         }
 
         $active = (bool) $actor->twofa_active;
+
         $payload = [
             'enabled' => $active,
             'qrCode' => '',
@@ -36,6 +37,10 @@ class TwoFactorController implements RequestHandlerInterface
         ];
 
         if (!$active) {
+            if (!$actor->can("nearata-twofactor.enable")) {
+                return new EmptyResponse(403);
+            }
+
             $otp = TOTP::create();
             $payload['secret'] = $otp->getSecret();
 

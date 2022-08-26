@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.1] - 2021-09-11
 
-- Fix wrong generation of backup qr codes ([Issue #3](https://github.com/Nearata/flarum-ext-twofactor/issues/3))
+- Fix wrong generation of backup qr codes ([Issue #3](https://github.com/Nearata/flarum-ext-twofactor/issues/3)).
+- Ability to choose which groups can enable Two Factor.
 
 ## [2.0.0] - 2021-06-20
 

@@ -2,10 +2,12 @@
 
 namespace Nearata\TwoFactor;
 
+use Flarum\Api\Serializer\BasicUserSerializer;
 use Flarum\Extend;
 use Nearata\TwoFactor\Api\Controller\TwoFactorBackupsController;
 use Nearata\TwoFactor\Api\Controller\TwoFactorController;
 use Nearata\TwoFactor\Api\Controller\TwoFactorUpdateController;
+use Nearata\TwoFactor\Api\Serializer\ExtendBasicUserSerializer;
 use Nearata\TwoFactor\Forum\Controller\CustomLogInController;
 use Nearata\TwoFactor\Http\Middleware\AuthenticateWithTwoFactor;
 
@@ -32,5 +34,8 @@ return [
         ->serializeToForum('canGenerateBackups', 'nearata-twofactor.admin.generate_backups', 'boolval'),
 
     (new Extend\Middleware('api'))
-        ->add(AuthenticateWithTwoFactor::class)
+        ->add(AuthenticateWithTwoFactor::class),
+
+    (new Extend\ApiSerializer(BasicUserSerializer::class))
+        ->attributes(ExtendBasicUserSerializer::class)
 ];
