@@ -9,7 +9,7 @@
     "type": "flarum-extension",
     "license": "Unlicense",
     "require": {
-        "flarum/core": "1.4.1",
+        "flarum/core": "^1.0",
         "spomky-labs/otphp": "^10.0.3|^11.0.0"
     },
     "authors": [
