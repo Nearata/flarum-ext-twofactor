@@ -8,7 +8,7 @@ use Nearata\TwoFactor\Api\Controller\TwoFactorBackupsController;
 use Nearata\TwoFactor\Api\Controller\TwoFactorController;
 use Nearata\TwoFactor\Api\Controller\TwoFactorUpdateController;
 use Nearata\TwoFactor\Api\Serializer\ExtendBasicUserSerializer;
-use Nearata\TwoFactor\Forum\Controller\CustomLogInController;
+use Nearata\TwoFactor\Forum\Controller\LogInController;
 use Nearata\TwoFactor\Http\Middleware\AuthenticateWithTwoFactor;
 
 return [
@@ -28,7 +28,7 @@ return [
 
     (new Extend\Routes('forum'))
         ->remove('login')
-        ->post('/login', 'login', CustomLogInController::class),
+        ->post('/login', 'login', LogInController::class),
 
     (new Extend\Settings())
         ->serializeToForum('canGenerateBackups', 'nearata-twofactor.admin.generate_backups', 'boolval'),
