@@ -12,6 +12,9 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class TwoFactorBackupsController implements RequestHandlerInterface
 {
+    /**
+     * @var SettingsRepositoryInterface
+     */
     protected $settings;
 
     public function __construct(SettingsRepositoryInterface $settings)
@@ -27,7 +30,7 @@ class TwoFactorBackupsController implements RequestHandlerInterface
             return new EmptyResponse(403);
         }
 
-        if (!$actor->can("nearata-twofactor.enable")) {
+        if (!$actor->can('nearata-twofactor.enable')) {
             return new EmptyResponse(403);
         }
 

@@ -12,6 +12,9 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class AuthenticateWithTwoFactor implements MiddlewareInterface
 {
+    /**
+     * @var UserRepository
+     */
     protected $users;
 
     public function __construct(UserRepository $users)

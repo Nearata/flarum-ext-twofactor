@@ -7,19 +7,19 @@ use Flarum\Extend;
 use Nearata\TwoFactor\Api\Controller\TwoFactorBackupsController;
 use Nearata\TwoFactor\Api\Controller\TwoFactorController;
 use Nearata\TwoFactor\Api\Controller\TwoFactorUpdateController;
-use Nearata\TwoFactor\Api\Serializer\ExtendBasicUserSerializer;
+use Nearata\TwoFactor\Api\Serializer\BasicUserSerializerAttributes;
 use Nearata\TwoFactor\Forum\Controller\LogInController;
 use Nearata\TwoFactor\Http\Middleware\AuthenticateWithTwoFactor;
 
 return [
     (new Extend\Frontend('forum'))
         ->js(__DIR__.'/js/dist/forum.js')
-        ->css(__DIR__.'/resources/less/forum.less'),
+        ->css(__DIR__.'/less/forum.less'),
 
     (new Extend\Frontend('admin'))
         ->js(__DIR__.'/js/dist/admin.js'),
 
-    new Extend\Locales(__DIR__ . '/resources/locale'),
+    new Extend\Locales(__DIR__.'/locale'),
 
     (new Extend\Routes('api'))
         ->get('/twofactor', 'twofactor.index', TwoFactorController::class)
@@ -31,11 +31,12 @@ return [
         ->post('/login', 'login', LogInController::class),
 
     (new Extend\Settings())
+        ->default('nearata-twofactor.admin.generate_backups', false)
         ->serializeToForum('canGenerateBackups', 'nearata-twofactor.admin.generate_backups', 'boolval'),
 
     (new Extend\Middleware('api'))
         ->add(AuthenticateWithTwoFactor::class),
 
     (new Extend\ApiSerializer(BasicUserSerializer::class))
-        ->attributes(ExtendBasicUserSerializer::class)
+        ->attributes(BasicUserSerializerAttributes::class)
 ];

@@ -49,7 +49,7 @@ class TwoFactorUpdateController implements RequestHandlerInterface
             $actor->twofa_secret = '';
             $actor->twofa_codes = '';
         } else {
-            if (!$actor->can("nearata-twofactor.enable")) {
+            if (!$actor->can('nearata-twofactor.enable')) {
                 return new EmptyResponse(403);
             }
 

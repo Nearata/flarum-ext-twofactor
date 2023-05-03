@@ -13,6 +13,9 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class TwoFactorController implements RequestHandlerInterface
 {
+    /**
+     * @var Config
+     */
     protected $config;
 
     public function __construct(Config $config)
@@ -37,7 +40,7 @@ class TwoFactorController implements RequestHandlerInterface
         ];
 
         if (!$active) {
-            if (!$actor->can("nearata-twofactor.enable")) {
+            if (!$actor->can('nearata-twofactor.enable')) {
                 return new EmptyResponse(403);
             }
 
