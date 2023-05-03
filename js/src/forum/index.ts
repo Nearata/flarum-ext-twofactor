@@ -8,38 +8,38 @@ import LogInModal from "flarum/forum/components/LogInModal";
 import SettingsPage from "flarum/forum/components/SettingsPage";
 
 app.initializers.add("nearata-twofactor", () => {
-    extend(SettingsPage.prototype, "accountItems", function (items) {
-        if (!app.session.user?.attribute("nearataTwoFactorCanEnable")) {
-            return;
-        }
+  extend(SettingsPage.prototype, "accountItems", function (items) {
+    if (!app.session.user?.attribute("nearataTwoFactorCanEnable")) {
+      return;
+    }
 
-        items.add(
-            "nearataTwoFactor",
-            m(
-                Button,
-                {
-                    class: "Button",
-                    onclick: () =>
-                        app.modal.show(TwoFactorSetupModal, {
-                            twoFactorState: new TwoFactorState(),
-                        }),
-                },
-                app.translator.trans("nearata-twofactor.forum.setup_button")
-            )
-        );
-    });
+    items.add(
+      "nearataTwoFactor",
+      m(
+        Button,
+        {
+          class: "Button",
+          onclick: () =>
+            app.modal.show(TwoFactorSetupModal, {
+              twoFactorState: new TwoFactorState(),
+            }),
+        },
+        app.translator.trans("nearata-twofactor.forum.setup_button")
+      )
+    );
+  });
 
-    override(LogInModal.prototype, "onerror", function (original, error) {
-        const response = error.response;
+  override(LogInModal.prototype, "onerror", function (original, error) {
+    const response = error.response;
 
-        if (response && "has2FA" in response && response.has2FA) {
-            app.modal.show(TwoFactorLogInModal, {
-                identification: this.identification(),
-                password: this.password(),
-                remember: this.remember(),
-            });
-        } else {
-            return original(error);
-        }
-    });
+    if (response && "has2FA" in response && response.has2FA) {
+      app.modal.show(TwoFactorLogInModal, {
+        identification: this.identification(),
+        password: this.password(),
+        remember: this.remember(),
+      });
+    } else {
+      return original(error);
+    }
+  });
 });
