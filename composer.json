@@ -1,6 +1,6 @@
 {
     "name": "nearata/flarum-ext-twofactor",
-    "description": "Allow your users to enable two factor authentication.",
+    "description": "Allows your users to activate 2FA authentication.",
     "keywords": [
         "flarum",
         "twofactor",
@@ -9,7 +9,7 @@
     "type": "flarum-extension",
     "license": "Unlicense",
     "require": {
-        "flarum/core": "^1.0",
+        "flarum/core": "^1.7.0",
         "spomky-labs/otphp": "^10.0.3|^11.0.0"
     },
     "authors": [

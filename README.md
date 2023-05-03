@@ -1,6 +1,6 @@
 # Two Factor
 
-> A [Flarum](http://flarum.org) extension. Allow your users to enable two factor authentication.
+> Allows your users to activate 2FA authentication.
 
 ## Note
 
@@ -10,7 +10,14 @@
 ## Install
 
 ```sh
-composer require nearata/flarum-ext-twofactor
+composer require nearata/flarum-ext-twofactor:"*"
+```
+
+## Update
+
+```sh
+composer require nearata/flarum-ext-twofactor:"*"
+php flarum cache:clear
 ```
 
 ## Remove
