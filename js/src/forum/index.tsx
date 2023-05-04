@@ -13,19 +13,17 @@ app.initializers.add("nearata-twofactor", () => {
       return;
     }
 
+    const onclick = () => {
+      app.modal.show(TwoFactorSetupModal, {
+        twoFactorState: new TwoFactorState(),
+      });
+    };
+
     items.add(
       "nearataTwoFactor",
-      m(
-        Button,
-        {
-          class: "Button",
-          onclick: () =>
-            app.modal.show(TwoFactorSetupModal, {
-              twoFactorState: new TwoFactorState(),
-            }),
-        },
-        app.translator.trans("nearata-twofactor.forum.setup_button")
-      )
+      <Button class="Button" onclick={onclick.bind(this)}>
+        {app.translator.trans("nearata-twofactor.forum.setup_button")}
+      </Button>
     );
   });
 

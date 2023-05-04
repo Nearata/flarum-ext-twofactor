@@ -11,7 +11,8 @@ type GenerateResponse = {
 };
 
 export default class TwoFactorState {
-  apiUrl: string;
+  apiUrl: string = app.forum.attribute("apiUrl");
+
   loading: boolean;
   enabled: boolean;
   qrCode: string;
@@ -19,8 +20,6 @@ export default class TwoFactorState {
   backups: Array<string>;
 
   constructor() {
-    this.apiUrl = app.forum.attribute("apiUrl");
-
     this.loading = false;
     this.enabled = false;
     this.qrCode = "";
