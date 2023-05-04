@@ -23,7 +23,7 @@ const addResources = async () => {
   }
 
   await load.js(
-    "https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"
+    "https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.0/qrcode.min.js"
   );
 
   await load.js(
