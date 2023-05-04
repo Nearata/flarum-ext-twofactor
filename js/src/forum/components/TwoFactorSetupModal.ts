@@ -38,7 +38,8 @@ const trans = (key: string, options = {}) => {
 };
 
 export default class TwoFactorSetupModal extends Modal<Attrs> {
-  isDismissible = false;
+  protected static readonly isDismissibleViaEscKey: boolean = false
+  protected static readonly isDismissibleViaBackdropClick: boolean = false;
 
   twoFactorState!: TwoFactorState;
   success!: boolean;
