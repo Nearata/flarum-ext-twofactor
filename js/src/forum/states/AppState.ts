@@ -10,7 +10,7 @@ type GenerateResponse = {
   codes: Array<string>;
 };
 
-export default class TwoFactorState {
+export default class AppState {
   apiUrl: string = app.forum.attribute("apiUrl");
 
   loading: boolean;
@@ -39,9 +39,9 @@ export default class TwoFactorState {
         this.enabled = r.enabled;
         this.qrCode = r.qrCode;
         this.secret = r.secret;
-
+      })
+      .finally(() => {
         this.loading = false;
-
         m.redraw();
       });
   }
@@ -56,9 +56,9 @@ export default class TwoFactorState {
       })
       .then((r: GenerateResponse) => {
         this.backups.push(...r.codes);
-
+      })
+      .finally(() => {
         this.loading = false;
-
         m.redraw();
       });
   }

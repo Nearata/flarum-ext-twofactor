@@ -5,7 +5,7 @@ import app from "flarum/forum/app";
 import type Mithril from "mithril";
 
 const trans = (key: string) => {
-  return app.translator.trans(`nearata-twofactor.forum.${key}`);
+  return app.translator.trans(`nearata-twofactor.forum.login.${key}`);
 };
 
 interface Attrs extends IInternalModalAttrs {
@@ -37,7 +37,7 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
   }
 
   title() {
-    return trans("log_in_modal.title");
+    return trans("title");
   }
 
   content() {
@@ -48,7 +48,7 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
             <input
               type="text"
               class="FormControl"
-              placeholder={trans("log_in_modal.otp_placeholder")}
+              placeholder={trans("app.passcode_placeholder")}
               name="otp"
               autocomplete="off"
               bidi={this.code}
@@ -61,7 +61,7 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
               type="submit"
               loading={this.loading}
             >
-              {trans("log_in_modal.submit_button")}
+              {trans("app.submit_button_label")}
             </Button>
           </div>
         </div>
@@ -77,11 +77,11 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
     const identification = this.identification;
     const password = this.password;
     const remember = this.remember;
-    const twofa = this.code;
+    const code = this.code;
 
     app.session
       .login(
-        { identification, password, remember, twofa },
+        { identification, password, remember, code },
         { errorHandler: this.onerror.bind(this) }
       )
       .then(() => window.location.reload(), this.loaded.bind(this));
@@ -89,7 +89,7 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
 
   onerror(error: any) {
     if (error.status === 401) {
-      error.alert.content = trans("invalid_twofa_code");
+      error.alert.content = trans("app.invalid_passcode");
     }
 
     super.onerror(error);

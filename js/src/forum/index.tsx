@@ -1,30 +1,20 @@
+import TwoFactorItems from "./components/TwoFactorItems";
 import TwoFactorLogInModal from "./components/TwoFactorLogInModal";
-import TwoFactorSetupModal from "./components/TwoFactorSetupModal";
-import TwoFactorState from "./states/TwoFactorState";
-import Button from "flarum/common/components/Button";
 import { extend, override } from "flarum/common/extend";
 import app from "flarum/forum/app";
 import LogInModal from "flarum/forum/components/LogInModal";
 import SettingsPage from "flarum/forum/components/SettingsPage";
 
 app.initializers.add("nearata-twofactor", () => {
-  extend(SettingsPage.prototype, "accountItems", function (items) {
+  /**
+   * TODO: Change to UserSecurityPage in 1.8
+   */
+  extend(SettingsPage.prototype, "settingsItems", function (items) {
     if (!app.session.user?.attribute("nearataTwoFactorCanEnable")) {
       return;
     }
 
-    const onclick = () => {
-      app.modal.show(TwoFactorSetupModal, {
-        twoFactorState: new TwoFactorState(),
-      });
-    };
-
-    items.add(
-      "nearataTwoFactor",
-      <Button class="Button" onclick={onclick.bind(this)}>
-        {app.translator.trans("nearata-twofactor.forum.setup_button")}
-      </Button>
-    );
+    items.add("nearataTwoFactor", <TwoFactorItems />);
   });
 
   override(LogInModal.prototype, "onerror", function (original, error) {
