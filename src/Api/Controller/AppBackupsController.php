@@ -4,13 +4,13 @@ namespace Nearata\TwoFactor\Api\Controller;
 
 use Flarum\Http\RequestUtil;
 use Flarum\Settings\SettingsRepositoryInterface;
-use Laminas\Diactoros\Response\EmptyResponse;
+use Flarum\User\Exception\PermissionDeniedException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class TwoFactorBackupsController implements RequestHandlerInterface
+class AppBackupsController implements RequestHandlerInterface
 {
     /**
      * @var SettingsRepositoryInterface
@@ -26,28 +26,24 @@ class TwoFactorBackupsController implements RequestHandlerInterface
     {
         $actor = RequestUtil::getActor($request);
 
-        if ($actor->isGuest()) {
-            return new EmptyResponse(403);
-        }
+        $actor->assertRegistered();
 
-        if (!$actor->can('nearata-twofactor.enable')) {
-            return new EmptyResponse(403);
+        $actor->assertCan('nearata-twofactor.enable');
+
+        if (!$actor->twofa_app_active) {
+            throw new PermissionDeniedException();
         }
 
         $canGenerate = $this->settings->get('nearata-twofactor.admin.generate_backups');
 
         if (!$canGenerate) {
-            return new EmptyResponse(401);
+            throw new PermissionDeniedException();
         }
 
-        if (!$actor->twofa_active) {
-            return new EmptyResponse(401);
-        }
-
-        $codes = json_decode($actor->twofa_codes);
+        $codes = $actor->twofa_app_codes;
 
         if ($codes && count($codes) > 0) {
-            return new EmptyResponse(401);
+            throw new PermissionDeniedException();
         }
 
         $newBackups = [];
@@ -59,7 +55,7 @@ class TwoFactorBackupsController implements RequestHandlerInterface
             array_push($newBackups, $hex);
         }
 
-        $actor->twofa_codes = json_encode($newBackups);
+        $actor->twofa_app_codes = $newBackups;
         $actor->save();
 
         return new JsonResponse(['codes' => $newBackups]);

@@ -3,12 +3,19 @@
 namespace Nearata\TwoFactor;
 
 use Flarum\User\User;
+use OTPHP\TOTP;
 
 class Helpers
 {
-    public static function isBackupCode(User $user, string $code): bool
+    public static function checkAppCode(User $actor, string $code, string $secret = null): bool
     {
-        $backups = json_decode($user->twofa_codes);
+        $totp = TOTP::create($secret ?? $actor->twofa_app_secret);
+
+        if ($totp->verify($code)) {
+            return true;
+        }
+
+        $backups = $actor->twofa_app_codes;
 
         if (is_null($backups)) {
             return false;
@@ -24,9 +31,19 @@ class Helpers
             return false;
         }
 
-        $user->twofa_codes = json_encode($backups);
-        $user->save();
+        $actor->twofa_app_codes = $backups;
+        $actor->save();
 
         return true;
+    }
+
+    public static function has2FA(User $actor): bool
+    {
+        return $actor->twofa_app_active;
+    }
+
+    public static function isValidType(string $type): bool
+    {
+        return in_array($type, ['app']);
     }
 }

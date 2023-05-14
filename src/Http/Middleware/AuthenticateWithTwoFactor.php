@@ -33,7 +33,7 @@ class AuthenticateWithTwoFactor implements MiddlewareInterface
 
         $user = $this->users->findByIdentification($identification);
 
-        if ($user && $user->twofa_active) {
+        if ($user && $user->twofa_app_active) {
             throw new NotAuthenticatedException;
         }
 

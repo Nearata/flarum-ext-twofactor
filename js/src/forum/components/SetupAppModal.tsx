@@ -1,4 +1,4 @@
-import AppState from "../states/AppState";
+import SetupAppState from "../states/SetupAppState";
 import SetupAppDownloadBackups from "./SetupAppDownloadBackups";
 import SetupAppQRCode from "./SetupAppQRCode";
 import Button from "flarum/common/components/Button";
@@ -14,36 +14,33 @@ const trans = (key: string, options = {}) => {
   );
 };
 
-type UpdateResponse = {
-  enabled: boolean;
-};
-
 export default class SetupAppModal extends Modal {
   protected static readonly isDismissibleViaEscKey: boolean = false;
   protected static readonly isDismissibleViaBackdropClick: boolean = false;
 
-  appState!: AppState;
+  canGenerateBackups: boolean =
+    app.forum.attribute<boolean>("canGenerateBackups");
+
+  appState!: SetupAppState;
   success!: boolean;
-  enabled!: boolean;
   manually!: boolean;
   password!: Stream<string>;
   passcode!: Stream<string>;
-  canGenerateBackups!: boolean;
 
   oninit(vnode: any) {
     super.oninit(vnode);
 
-    this.appState = new AppState();
-    this.appState.refresh();
+    this.appState = new SetupAppState();
+
+    if (!this.appState.enabled) {
+      this.appState.generateQRCode();
+    }
 
     this.success = false;
-    this.enabled = false;
     this.manually = false;
 
     this.password = Stream("");
     this.passcode = Stream("");
-
-    this.canGenerateBackups = app.forum.attribute("canGenerateBackups");
   }
 
   className() {
@@ -65,11 +62,13 @@ export default class SetupAppModal extends Modal {
           <div class="Modal-body">
             <div class="Form Form--centered">
               <p>
-                {this.enabled
+                {this.appState.enabled
                   ? trans("enable.success")
                   : trans("disable.success")}
               </p>
-              {this.enabled && this.canGenerateBackups && this.backupContent()}
+              {this.appState.enabled &&
+                this.canGenerateBackups &&
+                this.backupContent()}
             </div>
           </div>
           <div class="Modal-footer">
@@ -188,7 +187,7 @@ export default class SetupAppModal extends Modal {
 
     app
       .request<any>({
-        url: `${app.forum.attribute("apiUrl")}/twofactor`,
+        url: `${app.forum.attribute("apiUrl")}/nearata/twofactor/app`,
         method: "PATCH",
         body: {
           code: this.passcode(),
@@ -197,11 +196,12 @@ export default class SetupAppModal extends Modal {
         },
         errorHandler: this.onerror.bind(this),
       })
-      .then((r: UpdateResponse) => {
-        this.enabled = r.enabled;
+      .then(async () => {
         this.success = true;
 
-        if (this.canGenerateBackups && r.enabled) {
+        await this.appState.refresh();
+
+        if (this.appState.enabled && this.canGenerateBackups) {
           this.appState.generateBackups();
         }
       })
@@ -212,6 +212,9 @@ export default class SetupAppModal extends Modal {
   onerror(error: any) {
     if (error.status === 401) {
       error.alert.content = trans("invalid_passcode");
+
+      this.password("");
+      this.passcode("");
     }
 
     super.onerror(error);

@@ -1,6 +1,9 @@
+import AppLoginState from "../states/AppLoginState";
+import LoginState from "../states/LoginState";
 import Button from "flarum/common/components/Button";
-import Modal, { IInternalModalAttrs } from "flarum/common/components/Modal";
-import Stream from "flarum/common/utils/Stream";
+import Modal from "flarum/common/components/Modal";
+import ItemList from "flarum/common/utils/ItemList";
+import RequestError from "flarum/common/utils/RequestError";
 import app from "flarum/forum/app";
 import type Mithril from "mithril";
 
@@ -8,32 +11,21 @@ const trans = (key: string) => {
   return app.translator.trans(`nearata-twofactor.forum.login.${key}`);
 };
 
-interface Attrs extends IInternalModalAttrs {
-  identification: string;
-  password: string;
-  remember: boolean;
-}
+export default class TwoFactorLogInModal extends Modal {
+  protected static readonly isDismissibleViaEscKey = false;
+  protected static readonly isDismissibleViaBackdropClick = false;
 
-export default class TwoFactorLogInModal extends Modal<Attrs> {
-  identification!: string;
-  password!: string;
-  remember!: boolean;
-  code: Stream<string>;
+  types!: { [x: string]: boolean };
+  loginState: undefined | LoginState;
 
   oninit(vnode: Mithril.Vnode<this>) {
     super.oninit(vnode);
 
-    const { identification, password, remember } = this.attrs;
-
-    this.identification = identification;
-    this.password = password;
-    this.remember = remember;
-
-    this.code = Stream("");
+    this.types = vnode.attrs.types;
   }
 
   className() {
-    return "TwoFactorLogInModal Modal--small";
+    return "NearataTwoFactor LogInModal Modal--small";
   }
 
   title() {
@@ -43,25 +35,17 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
   content() {
     return (
       <div class="Modal-body">
+        <div class="LogInButtons">{this.authButtons().toArray()}</div>
         <div class="Form Form--centered">
-          <div class="Form-group">
-            <input
-              type="text"
-              class="FormControl"
-              placeholder={trans("app.passcode_placeholder")}
-              name="otp"
-              autocomplete="off"
-              bidi={this.code}
-              disabled={this.loading}
-            />
-          </div>
+          {this.loginState?.content()}
           <div class="Form-group">
             <Button
               class="Button Button--primary Button--block"
               type="submit"
               loading={this.loading}
+              disabled={this.loading || typeof this.loginState === "undefined"}
             >
-              {trans("app.submit_button_label")}
+              {trans("submit_button_label")}
             </Button>
           </div>
         </div>
@@ -69,27 +53,58 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
     );
   }
 
+  authButtons() {
+    const items = new ItemList();
+
+    if (this.types.app) {
+      items.add(
+        "app",
+        <Button
+          class="Button Button--Auth-app"
+          onclick={() => {
+            this.loginState = new AppLoginState();
+          }}
+          disabled={this.loginState?.type === "app"}
+        >
+          {trans("auth_buttons.app")}
+        </Button>
+      );
+    }
+
+    return items;
+  }
+
   onsubmit(e: SubmitEvent) {
     e.preventDefault();
 
-    this.loading = true;
+    if (typeof this.loginState === "undefined") {
+      return;
+    }
 
-    const identification = this.identification;
-    const password = this.password;
-    const remember = this.remember;
-    const code = this.code;
+    this.loading = true;
+    this.loginState.loading = true;
 
     app.session
-      .login(
-        { identification, password, remember, code },
-        { errorHandler: this.onerror.bind(this) }
-      )
+      .login(this.loginParams(), { errorHandler: this.onerror.bind(this) })
       .then(() => window.location.reload(), this.loaded.bind(this));
   }
 
-  onerror(error: any) {
-    if (error.status === 401) {
-      error.alert.content = trans("app.invalid_passcode");
+  loginParams() {
+    const data = {
+      ...this.attrs.loginParams,
+      "2FAType": this.loginState?.type,
+      "2FACode": this.loginState?.code(),
+    };
+
+    return data;
+  }
+
+  onerror(error: RequestError) {
+    if (error.status === 401 && error.alert) {
+      error.alert.content = this.loginState?.onErrorMessage;
+
+      this.loginState?.code("");
+      this.loginState!.loading = false;
     }
 
     super.onerror(error);

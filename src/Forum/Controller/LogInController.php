@@ -2,15 +2,12 @@
 
 namespace Nearata\TwoFactor\Forum\Controller;
 
-use Flarum\Http\AccessToken;
-use Flarum\Http\RememberAccessToken;
-use Flarum\User\Event\LoggedIn;
+use Flarum\Http\RequestUtil;
+use Flarum\User\Exception\NotAuthenticatedException;
 use Flarum\User\User;
 use Illuminate\Support\Arr;
-use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Nearata\TwoFactor\Helpers;
-use OTPHP\TOTP;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -19,49 +16,45 @@ class LogInController extends \Flarum\Forum\Controller\LogInController
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $body = $request->getParsedBody();
-        $params = Arr::only($body, ['identification', 'password', 'remember']);
+
+        $identification = Arr::get($body, 'identification');
+        $password = Arr::get($body, 'password');
 
         $this->validator->assertValid($body);
 
-        $response = $this->apiClient->withParentRequest($request)->withBody($params)->post('/token');
+        $user = $this->users->findByIdentification($identification);
 
-        if ($response->getStatusCode() === 200) {
-            $data = json_decode($response->getBody());
+        if (! $user || ! $user->checkPassword($password)) {
+            throw new NotAuthenticatedException();
+        }
 
-            // start-twofa
-            $user = $this->users->findOrFail($data->userId);
-            if ($user->twofa_active && $twoFactorResponse = $this->twoFactor($body, $user)) {
-                return $twoFactorResponse;
-            }
-            // end-twofa
+        if (Helpers::has2FA($user)) {
+            $response = $this->twoFactor($request, $body, $user);
 
-            $token = AccessToken::findValid($data->token);
-
-            $session = $request->getAttribute('session');
-            $this->authenticator->logIn($session, $token);
-
-            $this->events->dispatch(new LoggedIn($user, $token));
-
-            if ($token instanceof RememberAccessToken) {
-                $response = $this->rememberer->remember($response, $token);
+            if ($response) {
+                return $response;
             }
         }
 
-        return $response;
+        return parent::handle($request);
     }
 
-    private function twoFactor($body, User $user)
+    private function twoFactor(ServerRequestInterface $request, $body, User $user)
     {
-        $code = Arr::get($body, 'twofa');
+        $type = Arr::get($body, '2FAType');
+        $code = Arr::get($body, '2FACode');
 
-        if (is_null($code)) {
-            return new JsonResponse(['has2FA' => true], 401);
+        if (is_null($type) || is_null($code)) {
+            $response = $this->apiClient->withParentRequest(RequestUtil::withActor($request, $user))->get('/nearata/twofactor');
+            return new JsonResponse(['has2FA', 'type' => json_decode($response->getBody())], 401);
         }
 
-        $otp = TOTP::create($user->twofa_secret);
+        if (!Helpers::isValidType($type)) {
+            throw new NotAuthenticatedException();
+        }
 
-        if (!($otp->verify($code) || Helpers::isBackupCode($user, $code))) {
-            return new EmptyResponse(401);
+        if ($type == 'app' && !Helpers::checkAppCode($user, $code)) {
+            throw new NotAuthenticatedException();
         }
     }
 }

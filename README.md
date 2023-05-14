@@ -17,6 +17,7 @@ composer require nearata/flarum-ext-twofactor:"*"
 
 ```sh
 composer require nearata/flarum-ext-twofactor:"*"
+php flarum migrate
 php flarum cache:clear
 ```
 

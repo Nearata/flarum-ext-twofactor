@@ -7,7 +7,7 @@ import SettingsPage from "flarum/forum/components/SettingsPage";
 
 app.initializers.add("nearata-twofactor", () => {
   /**
-   * TODO: Change to UserSecurityPage in 1.8
+   * @todo: Change to UserSecurityPage in 1.8
    */
   extend(SettingsPage.prototype, "settingsItems", function (items) {
     if (!app.session.user?.attribute("nearataTwoFactorCanEnable")) {
@@ -18,13 +18,10 @@ app.initializers.add("nearata-twofactor", () => {
   });
 
   override(LogInModal.prototype, "onerror", function (original, error) {
-    const response = error.response;
-
-    if (response && "has2FA" in response && response.has2FA) {
+    if (error.responseText?.includes("has2FA")) {
       app.modal.show(TwoFactorLogInModal, {
-        identification: this.identification(),
-        password: this.password(),
-        remember: this.remember(),
+        loginParams: this.loginParams(),
+        types: error.response?.type,
       });
     } else {
       return original(error);

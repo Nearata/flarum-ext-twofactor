@@ -7,10 +7,11 @@ use Flarum\User\User;
 
 class BasicUserSerializerAttributes
 {
-    public function __invoke(BasicUserSerializer $serializer, User $user, array $attributes)
+    public function __invoke(BasicUserSerializer $serializer, User $actor, array $attributes)
     {
         return [
-            'nearataTwoFactorCanEnable' => $user->can('nearata-twofactor.enable')
+            'nearataTwoFactorCanEnable' => $actor->can('nearata-twofactor.enable'),
+            'nearataTwoFactorAppEnabled' => $actor->twofa_app_active
         ];
     }
 }

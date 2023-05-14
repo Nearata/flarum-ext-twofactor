@@ -7,6 +7,8 @@ nearata-twofactor:
   forum:
     settings:
       section_title: Two-Factor Authentication
+      configured: Configured
+      not_configured: Not Configured
       app:
         button_label: Authentication app
         button_help: You will receive an access code via your authentication app.
@@ -46,7 +48,9 @@ nearata-twofactor:
               copy_button_label: Copy
     login:
       title: Two-Factor Authentication
+      submit_button_label: Log In
+      auth_buttons:
+        app: Authentication App
       app:
         invalid_passcode: Invalid passcode.
         passcode_placeholder: "6-digit passcode"
-        submit_button_label: Log In
