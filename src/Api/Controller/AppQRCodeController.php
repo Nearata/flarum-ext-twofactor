@@ -40,7 +40,7 @@ class AppQRCodeController implements RequestHandlerInterface
 
         return new JsonResponse([
             'secret' => $otp->getSecret(),
-            'qrcode' => $otp->getProvisioningUri()
+            'qrcode' => $otp->getProvisioningUri(),
         ]);
     }
 }

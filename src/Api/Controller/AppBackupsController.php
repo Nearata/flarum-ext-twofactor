@@ -30,13 +30,13 @@ class AppBackupsController implements RequestHandlerInterface
 
         $actor->assertCan('nearata-twofactor.enable');
 
-        if (!$actor->twofa_app_active) {
+        if (! $actor->twofa_app_active) {
             throw new PermissionDeniedException();
         }
 
         $canGenerate = $this->settings->get('nearata-twofactor.admin.generate_backups');
 
-        if (!$canGenerate) {
+        if (! $canGenerate) {
             throw new PermissionDeniedException();
         }
 
@@ -48,7 +48,7 @@ class AppBackupsController implements RequestHandlerInterface
 
         $newBackups = [];
 
-        for($i = 0; $i < 16; $i++) {
+        for ($i = 0; $i < 16; $i++) {
             $bytes = random_bytes(4);
             $hex = bin2hex($bytes);
 

@@ -46,14 +46,15 @@ class LogInController extends \Flarum\Forum\Controller\LogInController
 
         if (is_null($type) || is_null($code)) {
             $response = $this->apiClient->withParentRequest(RequestUtil::withActor($request, $user))->get('/nearata/twofactor');
+
             return new JsonResponse(['has2FA', 'type' => json_decode($response->getBody())], 401);
         }
 
-        if (!Helpers::isValidType($type)) {
+        if (! Helpers::isValidType($type)) {
             throw new NotAuthenticatedException();
         }
 
-        if ($type == 'app' && !Helpers::checkAppCode($user, $code)) {
+        if ($type == 'app' && ! Helpers::checkAppCode($user, $code)) {
             throw new NotAuthenticatedException();
         }
     }

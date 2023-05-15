@@ -11,7 +11,7 @@ class BasicUserSerializerAttributes
     {
         return [
             'nearataTwoFactorCanEnable' => $actor->can('nearata-twofactor.enable'),
-            'nearataTwoFactorAppEnabled' => $actor->twofa_app_active
+            'nearataTwoFactorAppEnabled' => $actor->twofa_app_active,
         ];
     }
 }

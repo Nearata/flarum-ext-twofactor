@@ -23,7 +23,7 @@ class AppUpdateController implements RequestHandlerInterface
 
         $data = $request->getParsedBody();
 
-        if (!$actor->checkPassword(Arr::get($data, 'password', ''))) {
+        if (! $actor->checkPassword(Arr::get($data, 'password', ''))) {
             throw new NotAuthenticatedException();
         }
 
@@ -35,7 +35,7 @@ class AppUpdateController implements RequestHandlerInterface
 
         $secret = Arr::get($data, 'secret');
 
-        if (!$actor->twofa_app_active && is_null($secret)) {
+        if (! $actor->twofa_app_active && is_null($secret)) {
             throw new NotAuthenticatedException();
         }
 
@@ -50,12 +50,13 @@ class AppUpdateController implements RequestHandlerInterface
         return new EmptyResponse();
     }
 
-    private function enabling(User $actor, string $code, string $secret) {
-        if (!$actor->can('nearata-twofactor.enable')) {
+    private function enabling(User $actor, string $code, string $secret)
+    {
+        if (! $actor->can('nearata-twofactor.enable')) {
             throw new PermissionDeniedException();
         }
 
-        if (!Helpers::checkAppCode($actor, $code, $secret)) {
+        if (! Helpers::checkAppCode($actor, $code, $secret)) {
             throw new NotAuthenticatedException();
         }
 
@@ -63,8 +64,9 @@ class AppUpdateController implements RequestHandlerInterface
         $actor->twofa_app_secret = $secret;
     }
 
-    private function disabling(User $actor, $code) {
-        if (!Helpers::checkAppCode($actor, $code)) {
+    private function disabling(User $actor, $code)
+    {
+        if (! Helpers::checkAppCode($actor, $code)) {
             throw new NotAuthenticatedException();
         }
 

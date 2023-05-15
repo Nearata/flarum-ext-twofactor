@@ -17,7 +17,7 @@ class TwoFactorController implements RequestHandlerInterface
         $actor->assertRegistered();
 
         return new JsonResponse([
-            'app' => $actor->twofa_app_active
+            'app' => $actor->twofa_app_active,
         ]);
     }
 }
