@@ -6,6 +6,7 @@ use Flarum\Http\RequestUtil;
 use Flarum\User\Exception\NotAuthenticatedException;
 use Flarum\User\Exception\PermissionDeniedException;
 use Flarum\User\User;
+use Flarum\User\UserRepository;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Nearata\TwoFactor\Helpers;
@@ -15,6 +16,16 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class AppUpdateController implements RequestHandlerInterface
 {
+    /**
+     * @var UserRepository
+     */
+    protected $users;
+
+    public function __construct(UserRepository $users)
+    {
+        $this->users = $users;
+    }
+
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $actor = RequestUtil::getActor($request);
@@ -22,6 +33,10 @@ class AppUpdateController implements RequestHandlerInterface
         $actor->assertRegistered();
 
         $data = $request->getParsedBody();
+
+        if ($response = $this->adminDisabling($actor, $data)) {
+            return $response;
+        }
 
         if (! $actor->checkPassword(Arr::get($data, 'password', ''))) {
             throw new NotAuthenticatedException();
@@ -52,9 +67,7 @@ class AppUpdateController implements RequestHandlerInterface
 
     private function enabling(User $actor, string $code, string $secret)
     {
-        if (! $actor->can('nearata-twofactor.enable')) {
-            throw new PermissionDeniedException();
-        }
+        $actor->assertCan('nearata-twofactor.enable');
 
         if (! Helpers::checkAppCode($actor, $code, $secret)) {
             throw new NotAuthenticatedException();
@@ -73,5 +86,33 @@ class AppUpdateController implements RequestHandlerInterface
         $actor->twofa_app_active = false;
         $actor->twofa_app_secret = '';
         $actor->twofa_app_codes = [];
+    }
+
+    private function adminDisabling(User $actor, $data)
+    {
+        $userId = Arr::get($data, 'userId');
+
+        if (! $userId) {
+            return;
+        }
+
+        $actor->assertAdmin();
+
+        $user = $this->users->findOrFail($userId);
+
+        if (! $user->twofa_app_active) {
+            throw new PermissionDeniedException();
+        }
+
+        if ($user->id !== $actor->id && $user->isAdmin()) {
+            throw new PermissionDeniedException();
+        }
+
+        $user->twofa_app_active = false;
+        $user->twofa_app_secret = '';
+        $user->twofa_app_codes = [];
+        $user->save();
+
+        return new EmptyResponse();
     }
 }

@@ -1,6 +1,9 @@
+import extendEditUserModal from "../common/extendEditUserModal";
 import app from "flarum/admin/app";
 
 app.initializers.add("nearata-twofactor", () => {
+  extendEditUserModal();
+
   app.extensionData
     .for("nearata-twofactor")
     .registerSetting({

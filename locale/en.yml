@@ -54,3 +54,10 @@ nearata-twofactor:
       app:
         invalid_passcode: Invalid passcode.
         passcode_placeholder: "6-digit passcode"
+  lib:
+    edit_user:
+      section_title: Two-Factor Authentication
+      disable_confirmation: Are you sure? You are about to disable this authentication method for the user.
+      placeholder_text: Nothing to disable
+      app:
+        label: Authentication App
