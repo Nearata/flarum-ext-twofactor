@@ -44,7 +44,6 @@ return [
         ->attributes(BasicUserSerializerAttributes::class),
 
     (new Extend\Model(User::class))
-        ->default('twofa_app_codes', [])
         ->cast('twofa_app_secret', 'string')
         ->cast('twofa_app_active', 'boolean')
         ->cast('twofa_app_codes', 'array')
