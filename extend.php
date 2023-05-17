@@ -12,7 +12,6 @@ use Nearata\TwoFactor\Api\Controller\TwoFactorController;
 use Nearata\TwoFactor\Api\Serializer\BasicUserSerializerAttributes;
 use Nearata\TwoFactor\Forum\Controller\LogInController;
 use Nearata\TwoFactor\Forum\Controller\TwoFactorLogInController;
-use Nearata\TwoFactor\Http\Middleware\AuthenticateWithTwoFactor;
 
 return [
     (new Extend\Frontend('forum'))
@@ -38,9 +37,6 @@ return [
     (new Extend\Settings())
         ->default('nearata-twofactor.admin.generate_backups', false)
         ->serializeToForum('canGenerateBackups', 'nearata-twofactor.admin.generate_backups', 'boolval'),
-
-    (new Extend\Middleware('api'))
-        ->add(AuthenticateWithTwoFactor::class),
 
     (new Extend\ApiSerializer(BasicUserSerializer::class))
         ->attributes(BasicUserSerializerAttributes::class),
