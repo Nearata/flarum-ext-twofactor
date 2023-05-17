@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump php to 8
 - bump Flarum to 1.7
 - feat: Allow admins to turn off user two-factor authentication [#9]
+- fix: Conflict with Cloudflare Turnstile [#10]
 
 ## [2.1.1] - 2022-09-15
 

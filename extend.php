@@ -11,6 +11,7 @@ use Nearata\TwoFactor\Api\Controller\AppUpdateController;
 use Nearata\TwoFactor\Api\Controller\TwoFactorController;
 use Nearata\TwoFactor\Api\Serializer\BasicUserSerializerAttributes;
 use Nearata\TwoFactor\Forum\Controller\LogInController;
+use Nearata\TwoFactor\Forum\Controller\TwoFactorLogInController;
 use Nearata\TwoFactor\Http\Middleware\AuthenticateWithTwoFactor;
 
 return [
@@ -31,7 +32,8 @@ return [
 
     (new Extend\Routes('forum'))
         ->remove('login')
-        ->post('/login', 'login', LogInController::class),
+        ->post('/login', 'login', LogInController::class)
+        ->post('/nearata/twofactor/login', 'nearata-twofactor.login', TwoFactorLogInController::class),
 
     (new Extend\Settings())
         ->default('nearata-twofactor.admin.generate_backups', false)
@@ -46,5 +48,8 @@ return [
     (new Extend\Model(User::class))
         ->cast('twofa_app_secret', 'string')
         ->cast('twofa_app_active', 'boolean')
-        ->cast('twofa_app_codes', 'array')
+        ->cast('twofa_app_codes', 'array'),
+
+    (new Extend\Csrf)
+        ->exemptRoute('nearata-twofactor.login')
 ];

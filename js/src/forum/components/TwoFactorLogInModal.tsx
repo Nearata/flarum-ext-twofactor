@@ -15,13 +15,13 @@ export default class TwoFactorLogInModal extends Modal {
   protected static readonly isDismissibleViaEscKey = false;
   protected static readonly isDismissibleViaBackdropClick = false;
 
-  types!: { [x: string]: boolean };
+  payload!: any;
   loginState: undefined | LoginState;
 
   oninit(vnode: Mithril.Vnode<this>) {
     super.oninit(vnode);
 
-    this.types = vnode.attrs.types;
+    this.payload = vnode.attrs.payload;
   }
 
   className() {
@@ -56,7 +56,7 @@ export default class TwoFactorLogInModal extends Modal {
   authButtons() {
     const items = new ItemList();
 
-    if (this.types.app) {
+    if (this.payload.type.app) {
       items.add(
         "app",
         <Button
@@ -84,8 +84,13 @@ export default class TwoFactorLogInModal extends Modal {
     this.loading = true;
     this.loginState.loading = true;
 
-    app.session
-      .login(this.loginParams(), { errorHandler: this.onerror.bind(this) })
+    app
+      .request({
+        method: "POST",
+        url: `${app.forum.attribute("baseUrl")}/nearata/twofactor/login`,
+        body: { ...this.loginParams() },
+        errorHandler: this.onerror.bind(this),
+      })
       .then(() => window.location.reload(), this.loaded.bind(this));
   }
 

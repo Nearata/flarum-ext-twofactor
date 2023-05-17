@@ -22,7 +22,7 @@ app.initializers.add("nearata-twofactor", () => {
     if (error.responseText?.includes("has2FA")) {
       app.modal.show(TwoFactorLogInModal, {
         loginParams: this.loginParams(),
-        types: error.response?.type,
+        payload: error.response,
       });
     } else {
       return original(error);

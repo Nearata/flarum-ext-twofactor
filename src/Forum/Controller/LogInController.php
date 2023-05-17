@@ -2,10 +2,9 @@
 
 namespace Nearata\TwoFactor\Forum\Controller;
 
+use Flarum\Http\AccessToken;
 use Flarum\Http\RequestUtil;
 use Flarum\User\Exception\NotAuthenticatedException;
-use Flarum\User\User;
-use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\JsonResponse;
 use Nearata\TwoFactor\Helpers;
 use Psr\Http\Message\ResponseInterface;
@@ -15,47 +14,51 @@ class LogInController extends \Flarum\Forum\Controller\LogInController
 {
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $body = $request->getParsedBody();
+        $response = parent::handle($request);
 
-        $identification = Arr::get($body, 'identification');
-        $password = Arr::get($body, 'password');
+        if ($response->getStatusCode() !== 200) {
+            return $response;
+        }
 
-        $this->validator->assertValid($body);
+        $data = json_decode($response->getBody());
 
-        $user = $this->users->findByIdentification($identification);
+        $user = $this->users->findOrFail($data->userId);
 
-        if (! $user || ! $user->checkPassword($password)) {
+        if (! Helpers::has2FA($user)) {
+            return $response;
+        }
+
+        /**
+         * @var \Illuminate\Session\Store
+         */
+        $session = $request->getAttribute('session');
+
+        $accessToken = $session->pull('access_token');
+
+        /**
+         * @var ?AccessToken
+         */
+        $token = AccessToken::findValid($accessToken);
+
+        if (! $token) {
             throw new NotAuthenticatedException();
         }
 
-        if (Helpers::has2FA($user)) {
-            $response = $this->twoFactor($request, $body, $user);
+        $token->type = "twofactor_$token->type";
+        $token->save();
 
-            if ($response) {
-                return $response;
-            }
-        }
+        /**
+         * we have to rename it, otherwise its lost
+         */
+        $session->put('twofactor_access_token', $accessToken);
 
-        return parent::handle($request);
-    }
+        $response = $this->apiClient->withParentRequest(RequestUtil::withActor($request, $user))->get('/nearata/twofactor');
 
-    private function twoFactor(ServerRequestInterface $request, $body, User $user)
-    {
-        $type = Arr::get($body, '2FAType');
-        $code = Arr::get($body, '2FACode');
+        $payload = [
+            'has2FA',
+            'type' => json_decode($response->getBody()),
+        ];
 
-        if (is_null($type) || is_null($code)) {
-            $response = $this->apiClient->withParentRequest(RequestUtil::withActor($request, $user))->get('/nearata/twofactor');
-
-            return new JsonResponse(['has2FA', 'type' => json_decode($response->getBody())], 401);
-        }
-
-        if (! Helpers::isValidType($type)) {
-            throw new NotAuthenticatedException();
-        }
-
-        if ($type == 'app' && ! Helpers::checkAppCode($user, $code)) {
-            throw new NotAuthenticatedException();
-        }
+        return new JsonResponse($payload, 401);
     }
 }

@@ -38,7 +38,7 @@ export default class TwoFactorItems extends Component {
           <Button class="Button" onclick={() => app.modal.show(SetupAppModal)}>
             {trans("app.button_label")}
           </Button>
-          <span class={`status ${classList({ configured: appEnabled })}`}>
+          <span class={classList("status", { configured: appEnabled })}>
             {appEnabled ? trans("configured") : trans("not_configured")}
           </span>
         </div>
