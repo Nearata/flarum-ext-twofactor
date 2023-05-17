@@ -2,6 +2,7 @@ import AppLoginState from "../states/AppLoginState";
 import LoginState from "../states/LoginState";
 import Button from "flarum/common/components/Button";
 import Modal from "flarum/common/components/Modal";
+import Placeholder from "flarum/common/components/Placeholder";
 import ItemList from "flarum/common/utils/ItemList";
 import RequestError from "flarum/common/utils/RequestError";
 import app from "flarum/forum/app";
@@ -71,6 +72,13 @@ export default class TwoFactorLogInModal extends Modal {
       );
     }
 
+    if (!this.loginState) {
+      items.add(
+        "undefinedState",
+        <Placeholder text="Choose an authentication method..." />
+      );
+    }
+
     return items;
   }
 
@@ -88,7 +96,7 @@ export default class TwoFactorLogInModal extends Modal {
       .request({
         method: "POST",
         url: `${app.forum.attribute("baseUrl")}/nearata/twofactor/login`,
-        body: { ...this.loginParams() },
+        body: this.loginParams(),
         errorHandler: this.onerror.bind(this),
       })
       .then(() => window.location.reload(), this.loaded.bind(this));

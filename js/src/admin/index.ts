@@ -10,7 +10,7 @@ app.initializers.add("nearata-twofactor", () => {
       setting: "nearata-twofactor.admin.generate_backups",
       type: "boolean",
       label: app.translator.trans(
-        "nearata-twofactor.admin.settings.generate_backups"
+        "nearata-twofactor.admin.settings.generate_app_backups"
       ),
     })
     .registerPermission(

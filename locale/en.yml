@@ -1,7 +1,7 @@
 nearata-twofactor:
   admin:
     settings:
-      generate_backups: Generate backup codes.
+      generate_app_backups: Generate app backup codes.
     permissions:
       can_enable_twofactor: Can enable Two Factor
   forum:
