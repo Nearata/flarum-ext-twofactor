@@ -48,6 +48,7 @@ nearata-twofactor:
               copy_button_label: Copy
     login:
       title: Two-Factor Authentication
+      placeholder_label: Choose an authentication method...
       submit_button_label: Log In
       auth_buttons:
         app: Authentication App

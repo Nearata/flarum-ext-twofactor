@@ -44,7 +44,7 @@ export default class TwoFactorLogInModal extends Modal {
               class="Button Button--primary Button--block"
               type="submit"
               loading={this.loading}
-              disabled={this.loading || typeof this.loginState === "undefined"}
+              disabled={this.loading || !this.loginState}
             >
               {trans("submit_button_label")}
             </Button>
@@ -75,7 +75,7 @@ export default class TwoFactorLogInModal extends Modal {
     if (!this.loginState) {
       items.add(
         "undefinedState",
-        <Placeholder text="Choose an authentication method..." />
+        <Placeholder text={trans("placeholder_label")} />
       );
     }
 
