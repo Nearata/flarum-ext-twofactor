@@ -2,10 +2,9 @@
 
 > Allows your users to activate 2FA authentication.
 
-## Note
+## Screenshots
 
-- To allow the generation of backup codes, you must enable it in the admin settings of the extension.
-- Users can't use API if they have two factor enabled.
+Go to the [screenshots](screenshots) folder to see the previews.
 
 ## Install
 
