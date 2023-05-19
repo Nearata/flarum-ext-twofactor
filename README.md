@@ -31,4 +31,4 @@ php flarum cache:clear
 
 ## How to use
 
-Go to `User Settings` -> `Two Factor` button -> follow the screen
+Go to `User Settings` -> `Two-Factor Authentication` section
