@@ -2,7 +2,7 @@
 
 namespace Nearata\TwoFactor;
 
-use Flarum\Api\Serializer\BasicUserSerializer;
+use Flarum\Api\Serializer\CurrentUserSerializer;
 use Flarum\Extend;
 use Flarum\User\User;
 use Nearata\TwoFactor\Api\Controller\AppBackupsController;
@@ -39,7 +39,7 @@ return [
         ->default('nearata-twofactor.admin.generate_backups', false)
         ->serializeToForum('canGenerateBackups', 'nearata-twofactor.admin.generate_backups', 'boolval'),
 
-    (new Extend\ApiSerializer(BasicUserSerializer::class))
+    (new Extend\ApiSerializer(CurrentUserSerializer::class))
         ->attributes(BasicUserSerializerAttributes::class),
 
     (new Extend\Model(User::class))
