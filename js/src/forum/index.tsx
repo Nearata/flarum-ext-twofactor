@@ -4,13 +4,10 @@ import TwoFactorLogInModal from "./components/TwoFactorLogInModal";
 import { extend, override } from "flarum/common/extend";
 import app from "flarum/forum/app";
 import LogInModal from "flarum/forum/components/LogInModal";
-import SettingsPage from "flarum/forum/components/SettingsPage";
+import UserSecurityPage from "flarum/forum/components/UserSecurityPage"
 
 app.initializers.add("nearata-twofactor", () => {
-  /**
-   * @todo: Change to UserSecurityPage in 1.8
-   */
-  extend(SettingsPage.prototype, "settingsItems", function (items) {
+  extend(UserSecurityPage.prototype, "settingsItems", function (items) {
     if (!app.session.user?.attribute("nearataTwoFactorCanEnable")) {
       return;
     }
