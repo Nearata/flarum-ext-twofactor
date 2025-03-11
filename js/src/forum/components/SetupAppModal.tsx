@@ -7,10 +7,10 @@ import Modal from "flarum/common/components/Modal";
 import Stream from "flarum/common/utils/Stream";
 import app from "flarum/forum/app";
 
-const trans = (key: string, options = {}) => {
+const trans = (key: string, params = {}) => {
   return app.translator.trans(
     `nearata-twofactor.forum.settings.app.setup.${key}`,
-    options
+    params
   );
 };
 
@@ -21,26 +21,18 @@ export default class SetupAppModal extends Modal {
   canGenerateBackups: boolean =
     app.forum.attribute<boolean>("canGenerateBackups");
 
-  appState!: SetupAppState;
-  success!: boolean;
-  manually!: boolean;
-  password!: Stream<string>;
-  passcode!: Stream<string>;
+  appState = new SetupAppState();
+  success = false;
+  manually = false;
+  password = Stream("");
+  passcode = Stream("");
 
   oninit(vnode: any) {
     super.oninit(vnode);
 
-    this.appState = new SetupAppState();
-
     if (!this.appState.enabled) {
       this.appState.generateQRCode();
     }
-
-    this.success = false;
-    this.manually = false;
-
-    this.password = Stream("");
-    this.passcode = Stream("");
   }
 
   className() {

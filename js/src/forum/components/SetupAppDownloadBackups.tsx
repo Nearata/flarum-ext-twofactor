@@ -52,14 +52,10 @@ export default class SetupAppDownloadBackups extends Component {
       m.redraw();
     }
 
-    const title = app.forum.attribute("title");
-    const baseUrl = app.forum.attribute("baseUrl");
-    const backupCodes = this.backups.join("\n");
-
     const text = trans(`download_file_format`, {
-      website_title: title,
-      website_url: baseUrl,
-      codes: backupCodes,
+      website_title: app.forum.attribute("title"),
+      website_url: app.forum.attribute("baseUrl"),
+      codes: this.backups.join("\n"),
       date: window.dayjs().format("ll"),
     });
 

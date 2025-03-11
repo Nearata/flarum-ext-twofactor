@@ -1,11 +1,9 @@
-import AppLoginState from "../states/AppLoginState";
-import LoginState from "../states/LoginState";
 import Button from "flarum/common/components/Button";
 import Modal from "flarum/common/components/Modal";
-import Placeholder from "flarum/common/components/Placeholder";
-import ItemList from "flarum/common/utils/ItemList";
 import RequestError from "flarum/common/utils/RequestError";
 import app from "flarum/forum/app";
+import Stream from "flarum/common/utils/Stream";
+import Select from "flarum/common/components/Select"
 import type Mithril from "mithril";
 
 const trans = (key: string) => {
@@ -16,8 +14,9 @@ export default class TwoFactorLogInModal extends Modal {
   protected static readonly isDismissibleViaEscKey = false;
   protected static readonly isDismissibleViaBackdropClick = false;
 
+  passcode: Stream<string> = Stream("");
+  type: Stream<string> = Stream("app");
   payload!: any;
-  loginState: undefined | LoginState;
 
   oninit(vnode: Mithril.Vnode<this>) {
     super.oninit(vnode);
@@ -36,15 +35,34 @@ export default class TwoFactorLogInModal extends Modal {
   content() {
     return (
       <div class="Modal-body">
-        <div class="LogInButtons">{this.authButtons().toArray()}</div>
         <div class="Form Form--centered">
-          {this.loginState?.content()}
+          <div class="Form-group">
+            <input
+              type="text"
+              class="FormControl"
+              placeholder={trans(`passcode_placeholder`)}
+              name="passcode"
+              autocomplete="off"
+              bidi={this.passcode}
+              disabled={this.loading}
+            />
+          </div>
+          <div class="Form-group">
+            <Select
+              options={{
+                app: trans("auth_buttons.app")
+              }}
+              onchange={(value: string) => this.type(value)}
+              value={this.type()}
+              disabled={this.loading}
+            />
+          </div>
           <div class="Form-group">
             <Button
               class="Button Button--primary Button--block"
               type="submit"
               loading={this.loading}
-              disabled={this.loading || !this.loginState}
+              disabled={this.loading}
             >
               {trans("submit_button_label")}
             </Button>
@@ -54,43 +72,10 @@ export default class TwoFactorLogInModal extends Modal {
     );
   }
 
-  authButtons() {
-    const items = new ItemList();
-
-    if (this.payload.type.app) {
-      items.add(
-        "app",
-        <Button
-          class="Button Button--Auth-app"
-          onclick={() => {
-            this.loginState = new AppLoginState();
-          }}
-          disabled={this.loginState?.type === "app"}
-        >
-          {trans("auth_buttons.app")}
-        </Button>
-      );
-    }
-
-    if (!this.loginState) {
-      items.add(
-        "undefinedState",
-        <Placeholder text={trans("placeholder_label")} />
-      );
-    }
-
-    return items;
-  }
-
   onsubmit(e: SubmitEvent) {
     e.preventDefault();
 
-    if (typeof this.loginState === "undefined") {
-      return;
-    }
-
     this.loading = true;
-    this.loginState.loading = true;
 
     app
       .request({
@@ -105,8 +90,8 @@ export default class TwoFactorLogInModal extends Modal {
   loginParams() {
     const data = {
       ...this.attrs.loginParams,
-      "2FAType": this.loginState?.type,
-      "2FACode": this.loginState?.code(),
+      "2FAType": this.type,
+      "2FACode": this.passcode(),
     };
 
     return data;
@@ -114,10 +99,9 @@ export default class TwoFactorLogInModal extends Modal {
 
   onerror(error: RequestError) {
     if (error.status === 401 && error.alert) {
-      error.alert.content = this.loginState?.onErrorMessage;
-
-      this.loginState?.code("");
-      this.loginState!.loading = false;
+      error.alert.content = trans("invalid_passcode");
+      this.passcode("");
+      this.loading = false;
     }
 
     super.onerror(error);

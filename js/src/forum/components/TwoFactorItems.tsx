@@ -1,10 +1,9 @@
 import SetupAppModal from "./SetupAppModal";
 import Component from "flarum/common/Component";
-import Button from "flarum/common/components/Button";
 import FieldSet from "flarum/common/components/FieldSet";
 import ItemList from "flarum/common/utils/ItemList";
-import classList from "flarum/common/utils/classList";
 import app from "flarum/forum/app";
+import Switch from "flarum/common/components/Switch";
 import type Mithril from "mithril";
 
 const trans = (key: string) => {
@@ -12,10 +11,10 @@ const trans = (key: string) => {
 };
 
 export default class TwoFactorItems extends Component {
-  view(vnode: Mithril.Vnode<this>) {
+  view(_: Mithril.Vnode<this>) {
     return (
       <FieldSet
-        className="Settings-nearataTwoFactor"
+        className="UserSecurityPage-nearataTwoFactor"
         label={trans("section_title")}
       >
         {this.items().toArray()}
@@ -26,6 +25,7 @@ export default class TwoFactorItems extends Component {
   items() {
     const items = new ItemList();
 
+    const canEnable = app.session.user?.attribute("nearataTwoFactorCanEnable")
     const appEnabled = app.session.user!.attribute<boolean>(
       "nearataTwoFactorAppEnabled"
     );
@@ -35,12 +35,9 @@ export default class TwoFactorItems extends Component {
       <div class="AuthenticationApp">
         <div class="helpText">{trans("app.button_help")}</div>
         <div class="Button--container">
-          <Button class="Button" onclick={() => app.modal.show(SetupAppModal)}>
+          <Switch state={appEnabled} onchange={() => app.modal.show(SetupAppModal)} disabled={!canEnable}>
             {trans("app.button_label")}
-          </Button>
-          <span class={classList("status", { configured: appEnabled })}>
-            {appEnabled ? trans("configured") : trans("not_configured")}
-          </span>
+          </Switch>
         </div>
       </div>
     );

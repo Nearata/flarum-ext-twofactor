@@ -8,10 +8,6 @@ import UserSecurityPage from "flarum/forum/components/UserSecurityPage"
 
 app.initializers.add("nearata-twofactor", () => {
   extend(UserSecurityPage.prototype, "settingsItems", function (items) {
-    if (!app.session.user?.attribute("nearataTwoFactorCanEnable")) {
-      return;
-    }
-
     items.add("nearataTwoFactor", <TwoFactorItems />);
   });
 
