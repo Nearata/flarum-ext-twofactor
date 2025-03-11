@@ -28,7 +28,7 @@ export default class SetupAppDownloadBackups extends Component {
     super.oncreate(vnode);
   }
 
-  view(vnode: Mithril.Vnode<this>) {
+  view(_: Mithril.Vnode<this>) {
     return (
       <Button
         class="Button Button--primary Button--block"
@@ -40,7 +40,7 @@ export default class SetupAppDownloadBackups extends Component {
     );
   }
 
-  async onClick(e: PointerEvent) {
+  async onClick(_: PointerEvent) {
     if (typeof window.saveAs === "undefined") {
       this.loading = true;
 
@@ -52,7 +52,7 @@ export default class SetupAppDownloadBackups extends Component {
       m.redraw();
     }
 
-    const text = trans(`download_file_format`, {
+    const text = trans("download_file_format", {
       website_title: app.forum.attribute("title"),
       website_url: app.forum.attribute("baseUrl"),
       codes: this.backups.join("\n"),

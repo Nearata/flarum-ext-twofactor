@@ -25,7 +25,7 @@ export default class TwoFactorItems extends Component {
   items() {
     const items = new ItemList();
 
-    const canEnable = app.session.user?.attribute("nearataTwoFactorCanEnable")
+    const canEnable = app.session.user?.attribute<boolean>("nearataTwoFactorCanEnable")
     const appEnabled = app.session.user!.attribute<boolean>(
       "nearataTwoFactorAppEnabled"
     );
