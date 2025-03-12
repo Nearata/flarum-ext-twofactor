@@ -16,12 +16,9 @@ export default class TwoFactorLogInModal extends Modal {
 
   passcode: Stream<string> = Stream("");
   type: Stream<string> = Stream("app");
-  payload!: any;
 
   oninit(vnode: Mithril.Vnode<this>) {
     super.oninit(vnode);
-
-    this.payload = vnode.attrs.payload;
   }
 
   className() {
@@ -77,20 +74,15 @@ export default class TwoFactorLogInModal extends Modal {
 
     this.loading = true;
 
-    app
-      .request({
-        method: "POST",
-        url: `${app.forum.attribute("baseUrl")}/nearata/twofactor/login`,
-        body: this.loginParams(),
-        errorHandler: this.onerror.bind(this),
-      })
-      .then(() => window.location.reload(), this.loaded.bind(this));
+    app.session.login(this.loginParams(), {
+      errorHandler: this.onerror.bind(this)
+    }).then(() => window.location.reload(), this.loaded.bind(this));
   }
 
   loginParams() {
     const data = {
       ...this.attrs.loginParams,
-      "2FAType": this.type,
+      "2FAType": this.type(),
       "2FACode": this.passcode(),
     };
 

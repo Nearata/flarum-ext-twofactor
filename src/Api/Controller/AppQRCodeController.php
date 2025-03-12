@@ -2,25 +2,21 @@
 
 namespace Nearata\TwoFactor\Api\Controller;
 
-use Flarum\Foundation\Config;
 use Flarum\Http\RequestUtil;
 use Flarum\User\Exception\PermissionDeniedException;
 use Laminas\Diactoros\Response\JsonResponse;
-use OTPHP\TOTP;
+use Nearata\TwoFactor\TotpProvider;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 class AppQRCodeController implements RequestHandlerInterface
 {
-    /**
-     * @var Config
-     */
-    protected $config;
+    protected TotpProvider $totp;
 
-    public function __construct(Config $config)
+    public function __construct(TotpProvider $totp)
     {
-        $this->config = $config;
+        $this->totp = $totp;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -33,10 +29,8 @@ class AppQRCodeController implements RequestHandlerInterface
             throw new PermissionDeniedException();
         }
 
-        $otp = TOTP::create();
-
+        $otp = $this->totp->getTotp();
         $otp->setLabel($actor->username);
-        $otp->setIssuer($this->config->url()->getHost());
 
         return new JsonResponse([
             'secret' => $otp->getSecret(),

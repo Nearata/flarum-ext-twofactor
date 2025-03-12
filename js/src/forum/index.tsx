@@ -12,7 +12,7 @@ app.initializers.add("nearata-twofactor", () => {
   });
 
   override(LogInModal.prototype, "onerror", function (original, error) {
-    if (error.responseText?.includes("has2FA")) {
+    if (error.responseText?.includes("twofactor_login_init")) {
       app.modal.show(TwoFactorLogInModal, {
         loginParams: this.loginParams(),
         payload: error.response,

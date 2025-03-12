@@ -10,20 +10,20 @@ use Flarum\User\UserRepository;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Nearata\TwoFactor\Helpers;
+use Nearata\TwoFactor\TotpProvider;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 class AppUpdateController implements RequestHandlerInterface
 {
-    /**
-     * @var UserRepository
-     */
-    protected $users;
+    protected UserRepository $users;
+    protected TotpProvider $totp;
 
-    public function __construct(UserRepository $users)
+    public function __construct(UserRepository $users, TotpProvider $totp)
     {
         $this->users = $users;
+        $this->totp = $totp;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -68,8 +68,9 @@ class AppUpdateController implements RequestHandlerInterface
     private function enabling(User $actor, string $code, string $secret)
     {
         $actor->assertCan('nearata-twofactor.enable');
+        $this->totp->getTotp()->setSecret($secret);
 
-        if (! Helpers::checkAppCode($actor, $code, $secret)) {
+        if (! $this->totp->verify($actor, $code)) {
             throw new NotAuthenticatedException();
         }
 
@@ -77,9 +78,10 @@ class AppUpdateController implements RequestHandlerInterface
         $actor->twofa_app_secret = $secret;
     }
 
-    private function disabling(User $actor, $code)
+    private function disabling(User $actor, string $code)
     {
-        if (! Helpers::checkAppCode($actor, $code)) {
+        $this->totp->getTotp()->setSecret($actor->twofa_app_secret);
+        if (! $this->totp->verify($actor, $code)) {
             throw new NotAuthenticatedException();
         }
 

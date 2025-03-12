@@ -8,11 +8,11 @@ use Flarum\User\User;
 use Nearata\TwoFactor\Api\Controller\AppBackupsController;
 use Nearata\TwoFactor\Api\Controller\AppQRCodeController;
 use Nearata\TwoFactor\Api\Controller\AppUpdateController;
+use Nearata\TwoFactor\Api\Controller\CreateTokenController;
 use Nearata\TwoFactor\Api\Controller\TwoFactorController;
 use Nearata\TwoFactor\Api\Serializer\BasicUserSerializerAttributes;
 use Nearata\TwoFactor\Forum\Controller\LogInController;
-use Nearata\TwoFactor\Forum\Controller\TwoFactorLogInController;
-use Nearata\TwoFactor\Forum\ForumServiceProvider;
+use Nearata\TwoFactor\TwoFactorServiceProvider;
 
 return [
     (new Extend\Frontend('forum'))
@@ -25,6 +25,8 @@ return [
     new Extend\Locales(__DIR__.'/locale'),
 
     (new Extend\Routes('api'))
+        ->remove('token')
+        ->post('/token', 'token', CreateTokenController::class)
         ->get('/nearata/twofactor', 'nearata-twofactor.index', TwoFactorController::class)
         ->patch('/nearata/twofactor/app', 'nearata-twofactor.app.update', AppUpdateController::class)
         ->get('/nearata/twofactor/app/qrcode', 'nearata-twofactor.app.qrcode', AppQRCodeController::class)
@@ -32,8 +34,7 @@ return [
 
     (new Extend\Routes('forum'))
         ->remove('login')
-        ->post('/login', 'login', LogInController::class)
-        ->post('/nearata/twofactor/login', 'nearata-twofactor.login', TwoFactorLogInController::class),
+        ->post('/login', 'login', LogInController::class),
 
     (new Extend\Settings())
         ->default('nearata-twofactor.admin.generate_backups', false)
@@ -47,9 +48,9 @@ return [
         ->cast('twofa_app_active', 'boolean')
         ->cast('twofa_app_codes', 'array'),
 
-    (new Extend\Csrf)
-        ->exemptRoute('nearata-twofactor.login'),
-
     (new Extend\ServiceProvider)
-        ->register(ForumServiceProvider::class)
+        ->register(TwoFactorServiceProvider::class),
+
+    (new Extend\ErrorHandling)
+        ->status('twofactor_login_init', 401)
 ];

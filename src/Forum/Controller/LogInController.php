@@ -3,10 +3,9 @@
 namespace Nearata\TwoFactor\Forum\Controller;
 
 use Flarum\Http\AccessToken;
-use Flarum\Http\RequestUtil;
-use Flarum\User\Exception\NotAuthenticatedException;
-use Laminas\Diactoros\Response\JsonResponse;
-use Nearata\TwoFactor\Helpers;
+use Flarum\Http\RememberAccessToken;
+use Flarum\User\Event\LoggedIn;
+use Illuminate\Support\Arr;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -14,51 +13,28 @@ class LogInController extends \Flarum\Forum\Controller\LogInController
 {
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $response = parent::handle($request);
+        $body = $request->getParsedBody();
+        $params = Arr::only($body, ['identification', 'password', 'remember', '2FAType', '2FACode']);
 
-        if ($response->getStatusCode() !== 200) {
-            return $response;
+        $this->validator->assertValid($body);
+
+        $response = $this->apiClient->withParentRequest($request)->withBody($params)->post('/token');
+
+        if ($response->getStatusCode() === 200) {
+            $data = json_decode($response->getBody());
+
+            $token = AccessToken::findValid($data->token);
+
+            $session = $request->getAttribute('session');
+            $this->authenticator->logIn($session, $token);
+
+            $this->events->dispatch(new LoggedIn($this->users->findOrFail($data->userId), $token));
+
+            if ($token instanceof RememberAccessToken) {
+                $response = $this->rememberer->remember($response, $token);
+            }
         }
 
-        $data = json_decode($response->getBody());
-
-        $user = $this->users->findOrFail($data->userId);
-
-        if (! Helpers::has2FA($user)) {
-            return $response;
-        }
-
-        /**
-         * @var \Illuminate\Session\Store
-         */
-        $session = $request->getAttribute('session');
-
-        $accessToken = $session->pull('access_token');
-
-        /**
-         * @var ?AccessToken
-         */
-        $token = AccessToken::findValid($accessToken);
-
-        if (! $token) {
-            throw new NotAuthenticatedException();
-        }
-
-        $token->type = "twofactor_$token->type";
-        $token->save();
-
-        /**
-         * we have to rename it, otherwise its lost
-         */
-        $session->put('twofactor_access_token', $accessToken);
-
-        $response = $this->apiClient->withParentRequest(RequestUtil::withActor($request, $user))->get('/nearata/twofactor');
-
-        $payload = [
-            'has2FA',
-            'type' => json_decode($response->getBody()),
-        ];
-
-        return new JsonResponse($payload, 401);
+        return $response;
     }
 }
