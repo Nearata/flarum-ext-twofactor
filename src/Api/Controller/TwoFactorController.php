@@ -3,7 +3,7 @@
 namespace Nearata\TwoFactor\Api\Controller;
 
 use Flarum\Http\RequestUtil;
-use Flarum\User\Exception\PermissionDeniedException;
+use Flarum\User\Exception\NotAuthenticatedException;
 use Flarum\User\UserRepository;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -13,39 +13,26 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class TwoFactorController implements RequestHandlerInterface
 {
-    /**
-     * @var UserRepository
-     */
-    protected $users;
-
-    public function __construct(UserRepository $users)
+    public function __construct(protected UserRepository $users)
     {
-        $this->users = $users;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $actor = RequestUtil::getActor($request);
 
-        $actor->assertRegistered();
+        if ($actor->isGuest()) {
+            $body = $request->getParsedBody();
+            $identification = Arr::get($body, 'identification');
+            $password = Arr::get($body, 'password');
+            
+            $actor = $this->users->findByIdentification($identification);
 
-        $userId = Arr::get($request->getQueryParams(), 'userId');
-
-        $user = null;
-        if ($userId) {
-            $actor->assertAdmin();
-
-            $user = $this->users->findOrFail($userId);
-
-            if ($user->id !== $actor->id && $user->isAdmin()) {
-                throw new PermissionDeniedException();
+            if (is_null($actor) || ! $actor->checkPassword($password)) {
+                throw new NotAuthenticatedException();
             }
         }
 
-        $target = $user ?? $actor;
-
-        return new JsonResponse([
-            'app' => $target->twofa_app_active,
-        ]);
+        return new JsonResponse($actor->twoFactor()->pluck('type')->toArray());
     }
 }

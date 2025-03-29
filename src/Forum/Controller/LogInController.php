@@ -16,7 +16,24 @@ class LogInController extends \Flarum\Forum\Controller\LogInController
         $body = $request->getParsedBody();
         $params = Arr::only($body, ['identification', 'password', 'remember', '2FAType', '2FACode']);
 
-        $this->validator->assertValid($body);
+        /** @var \Illuminate\Session\Store */
+        $session = $request->getAttribute('session');
+
+        // in-case of page refresh
+        if (! Arr::has($params, '2FAType')) {
+            $session->forget('nearataTwoFactorValidated');
+        }
+
+        /**
+         * if exists, the user already validated the data
+         * ie. cloudflare turnstile and doesnt need
+         * to be validated again
+         *
+         * @todo: still looking for better approach
+         */
+        if (! $session->has('nearataTwoFactorValidated')) {
+            $this->validator->assertValid($body);
+        }
 
         $response = $this->apiClient->withParentRequest($request)->withBody($params)->post('/token');
 

@@ -1,18 +1,18 @@
-import extendEditUserModal from "../common/extendEditUserModal";
 import app from "flarum/admin/app";
 
 app.initializers.add("nearata-twofactor", () => {
-  extendEditUserModal();
-
   app.extensionData
     .for("nearata-twofactor")
-    .registerSetting({
-      setting: "nearata-twofactor.admin.generate_backups",
-      type: "boolean",
-      label: app.translator.trans(
-        "nearata-twofactor.admin.settings.generate_app_backups"
-      ),
-    })
+    .registerSetting(
+      {
+        setting: "nearata-twofactor.appNumberOfGeneratedBackupCodes",
+        type: "number",
+        label: app.translator.trans(
+          "nearata-twofactor.admin.settings.app_number_of_generated_backup_codes"
+        ),
+        min: "0"
+      }
+    )
     .registerPermission(
       {
         icon: "fas fa-shield-alt",

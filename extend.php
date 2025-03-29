@@ -2,16 +2,20 @@
 
 namespace Nearata\TwoFactor;
 
-use Flarum\Api\Serializer\BasicUserSerializer;
+use Flarum\Api\Controller\ShowUserController;
+use Flarum\Api\Serializer\CurrentUserSerializer;
 use Flarum\Extend;
 use Flarum\User\User;
 use Nearata\TwoFactor\Api\Controller\AppBackupsController;
-use Nearata\TwoFactor\Api\Controller\AppQRCodeController;
-use Nearata\TwoFactor\Api\Controller\AppUpdateController;
+use Nearata\TwoFactor\Api\Controller\AppCreateController;
+use Nearata\TwoFactor\Api\Controller\AppDeleteController;
+use Nearata\TwoFactor\Api\Controller\AppInitController;
 use Nearata\TwoFactor\Api\Controller\CreateTokenController;
 use Nearata\TwoFactor\Api\Controller\TwoFactorController;
-use Nearata\TwoFactor\Api\Serializer\BasicUserSerializerAttributes;
+use Nearata\TwoFactor\Api\Serializer\TwoFactorSerializer;
 use Nearata\TwoFactor\Forum\Controller\LogInController;
+use Nearata\TwoFactor\Model\TwoFactor;
+use Nearata\TwoFactor\Model\TwoFactorBackupCodes;
 use Nearata\TwoFactor\TwoFactorServiceProvider;
 
 return [
@@ -27,26 +31,28 @@ return [
     (new Extend\Routes('api'))
         ->remove('token')
         ->post('/token', 'token', CreateTokenController::class)
-        ->get('/nearata/twofactor', 'nearata-twofactor.index', TwoFactorController::class)
-        ->patch('/nearata/twofactor/app', 'nearata-twofactor.app.update', AppUpdateController::class)
-        ->get('/nearata/twofactor/app/qrcode', 'nearata-twofactor.app.qrcode', AppQRCodeController::class)
-        ->get('/nearata/twofactor/app/backups', 'nearata-twofactor.app.backups', AppBackupsController::class),
+        ->post('/nearata/twofactor', 'nearata-twofactor.index', TwoFactorController::class)
+        ->get('/nearata/twofactor/app', 'nearata-twofactor.app.init', AppInitController::class)
+        ->post('/nearata/twofactor/app', 'nearata-twofactor.app.create', AppCreateController::class)
+        ->delete('/nearata/twofactor/app', 'nearata-twofactor.app.delete', AppDeleteController::class)
+        ->post('/nearata/twofactor/app/backups', 'nearata-twofactor.app.backups', AppBackupsController::class),
 
     (new Extend\Routes('forum'))
         ->remove('login')
         ->post('/login', 'login', LogInController::class),
 
     (new Extend\Settings())
-        ->default('nearata-twofactor.admin.generate_backups', false)
-        ->serializeToForum('canGenerateBackups', 'nearata-twofactor.admin.generate_backups', 'boolval'),
+        ->default('nearata-twofactor.appNumberOfGeneratedBackupCodes', 5),
 
-    (new Extend\ApiSerializer(BasicUserSerializer::class))
-        ->attributes(BasicUserSerializerAttributes::class),
+    (new Extend\ApiSerializer(CurrentUserSerializer::class))
+        ->hasMany('twoFactor', TwoFactorSerializer::class),
+
+    (new Extend\ApiController(ShowUserController::class))
+        ->addInclude('twoFactor'),
 
     (new Extend\Model(User::class))
-        ->cast('twofa_app_secret', 'string')
-        ->cast('twofa_app_active', 'boolean')
-        ->cast('twofa_app_codes', 'array'),
+        ->hasMany('twoFactor', TwoFactor::class, 'user_id')
+        ->hasMany('twoFactorBackupCodes', TwoFactorBackupCodes::class, 'user_id'),
 
     (new Extend\ServiceProvider)
         ->register(TwoFactorServiceProvider::class),

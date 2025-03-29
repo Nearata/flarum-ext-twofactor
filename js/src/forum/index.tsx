@@ -1,4 +1,3 @@
-import extendEditUserModal from "../common/extendEditUserModal";
 import TwoFactorItems from "./components/TwoFactorItems";
 import TwoFactorLogInModal from "./components/TwoFactorLogInModal";
 import { extend, override } from "flarum/common/extend";
@@ -15,12 +14,11 @@ app.initializers.add("nearata-twofactor", () => {
     if (error.responseText?.includes("twofactor_login_init")) {
       app.modal.show(TwoFactorLogInModal, {
         loginParams: this.loginParams(),
-        payload: error.response,
       });
     } else {
       return original(error);
     }
   });
-
-  extendEditUserModal();
 });
+
+export { default as extend } from './extend';

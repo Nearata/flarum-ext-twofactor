@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 - php 8.1
+- flarum 1.8
+- authenticator app: hash backup codes like passwords
+- authenticator app: admin setting to adjust the number of backup codes to generate. None if <= 0.
+- admins can no longer disable others 2fa
+- authenticator app: replace FileSaver.js with plain js
+- fix some of the user settings being exposed to others [issue #10](https://github.com/Nearata/flarum-ext-twofactor/issues/15) [pull #15](https://github.com/Nearata/flarum-ext-twofactor/pull/16)
 
 ## [2.2.1] - 2023-06-18
 

@@ -2,9 +2,11 @@
 
 namespace Nearata\TwoFactor\Api\Controller;
 
+use Flarum\Api\Client;
 use Flarum\Http\RememberAccessToken;
 use Flarum\Http\SessionAccessToken;
 use Flarum\User\Exception\NotAuthenticatedException;
+use Flarum\User\User;
 use Flarum\User\UserRepository;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -12,17 +14,16 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Illuminate\Contracts\Bus\Dispatcher as BusDispatcher;
 use Illuminate\Contracts\Events\Dispatcher as EventDispatcher;
-use Nearata\TwoFactor\TotpProvider;
 use Nearata\TwoFactor\TwoFactorLoginInitException;
 
 class CreateTokenController extends \Flarum\Api\Controller\CreateTokenController
 {
-    protected TotpProvider $totp;
+    protected Client $apiClient;
 
-    public function __construct(UserRepository $users, BusDispatcher $bus, EventDispatcher $events, TotpProvider $totp)
+    public function __construct(UserRepository $users, BusDispatcher $bus, EventDispatcher $events, Client $apiClient)
     {
         parent::__construct($users, $bus, $events);
-        $this->totp = $totp;
+        $this->apiClient = $apiClient;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -38,18 +39,26 @@ class CreateTokenController extends \Flarum\Api\Controller\CreateTokenController
             throw new NotAuthenticatedException;
         }
 
-        if ($user->twofa_app_active) {
-            $passcode = Arr::get($body, '2FACode');
+        $response = $this->apiClient->withParentRequest($request)->withActor($user)->post('/nearata/twofactor');
+        $responseBody = json_decode($response->getBody());
 
-            if (is_null($passcode)) {
-                throw new TwoFactorLoginInitException;
+        if (count($responseBody) > 0) {
+            /** @var \Illuminate\Session\Store */
+            $session = $request->getAttribute('session');
+
+            $twofaType = Arr::get($body, '2FAType');
+            $twofaCode = Arr::get($body, '2FACode');
+
+            if (is_null($twofaType)) {
+                $session->put('nearataTwoFactorValidated', 1);
+                throw new TwoFactorLoginInitException();
             }
 
-            $this->totp->getTotp()->setSecret($user->twofa_app_secret);
-
-            if (! $this->totp->verify($user, $passcode)) {
+            if (! $this->processProvider($twofaType, $user, $twofaCode)) {
                 throw new NotAuthenticatedException;
             }
+
+            $session->forget('nearataTwoFactorValidated');
         }
 
         if (Arr::get($body, 'remember')) {
@@ -65,5 +74,20 @@ class CreateTokenController extends \Flarum\Api\Controller\CreateTokenController
             'token' => $token->token,
             'userId' => $user->id
         ]);
+    }
+
+    private function processProvider(string $type, User $user, string $passcode): bool
+    {
+        $providers = resolve('container')->tagged('nearata-twofactor.providers');
+        $valid = false;
+
+        foreach ($providers as $i) {
+            if ($i->type() === $type) {
+                $valid = $i->check($user, $passcode);
+                break;
+            }
+        }
+
+        return $valid;
     }
 }
