@@ -24,32 +24,11 @@ export default class AppSetupSuccess extends Component {
       return <LoadingIndicator />
     }
 
-    /*if (this.setupState.enabled) {
-      return (
-        <>
-          <p>{trans("app_setup_success_enable")}</p>
-          <AppSetupBackups setupState={this.setupState} />
-        </>
-      )
-    } else {
-      return <p>{trans("app_setup_success_disable")}</p>
-    }*/
-
     return (
       <>
         {this.setupState.enabled && <p>{trans("app_setup_success_enable")}</p>}
         {!this.setupState.enabled && trans("app_setup_success_disable")}
         {this.setupState.enabled && <AppSetupBackups setupState={this.setupState} />}
-        {
-          /*this.setupState.enabled ? (
-            <>
-              <p>{trans("app_setup_success_enable")}</p>
-              {<AppSetupBackups setupState={this.setupState} />}
-            </>
-          ) : (
-            trans("app_setup_success_disable")
-          )*/
-        }
       </>
     )
   }

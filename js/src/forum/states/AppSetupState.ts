@@ -1,19 +1,18 @@
 import Stream from "flarum/common/utils/Stream";
 import app from "flarum/forum/app";
+import SetupState from "./SetupState";
 
 type QRCodeResponse = {
   qrcode: string;
   secret: string;
 };
 
-export interface BackupsResponse {
+export type BackupsResponse = {
   codes: Array<string>;
 };
 
-export default class AppSetupState {
+export default class AppSetupState extends SetupState {
   apiUrl: string = app.forum.attribute("apiUrl");
-  loading = false
-  success = false
   manually = false
   password: Stream<string> = Stream("")
   passcode: Stream<string> = Stream("")
@@ -21,26 +20,17 @@ export default class AppSetupState {
   secret: string = ""
   backups: Array<string> = []
 
-  get enabled() {
-    // return !! app.store.getBy<TwoFactor>("twoFactor", "type", "app")
-    return !! app.session.user!.twoFactor().filter(i => i.attribute("type") === "app").length
-  }
-
-  async refresh() {
-    this.loading = true
-    await app.store.find("users", app.session.user!.id()!).finally(() => {
-      this.loading = false
-      m.redraw()
-    });
+  type() {
+    return "app"
   }
 
   async generateQRCode() {
     await app
-      .request<any>({
+      .request<QRCodeResponse>({
         url: `${this.apiUrl}/nearata/twofactor/app`,
         method: "GET",
       })
-      .then((r: QRCodeResponse) => {
+      .then((r) => {
         this.qrCode = r.qrcode;
         this.secret = r.secret;
       });
@@ -48,7 +38,7 @@ export default class AppSetupState {
 
   async generateBackups() {
     await app
-      .request<any>({
+      .request<BackupsResponse>({
         url: `${this.apiUrl}/nearata/twofactor/app/backups`,
         method: "POST",
         body: {
@@ -56,8 +46,6 @@ export default class AppSetupState {
           passcode: this.passcode()
         }
       })
-      .then((r: BackupsResponse) => {
-        this.backups.push(...r.codes);
-      });
+      .then((r) => this.backups.push(...r.codes));
   }
 }

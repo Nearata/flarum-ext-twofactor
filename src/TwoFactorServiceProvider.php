@@ -10,9 +10,11 @@ class TwoFactorServiceProvider extends AbstractServiceProvider
     public function register()
     {
         $this->container->bind(TotpProvider::class);
+        $this->container->bind(EmailProvider::class);
 
         $this->container->tag([
-            AppProvider::class
+            AppProvider::class,
+            EmailProvider::class
         ], 'nearata-twofactor.providers');
     }
 }

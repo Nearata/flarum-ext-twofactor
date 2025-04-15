@@ -4,7 +4,6 @@ namespace Nearata\TwoFactor\Model;
 
 use Flarum\Database\AbstractModel;
 use Flarum\User\User;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**

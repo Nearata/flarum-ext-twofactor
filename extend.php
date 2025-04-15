@@ -11,6 +11,9 @@ use Nearata\TwoFactor\Api\Controller\AppCreateController;
 use Nearata\TwoFactor\Api\Controller\AppDeleteController;
 use Nearata\TwoFactor\Api\Controller\AppInitController;
 use Nearata\TwoFactor\Api\Controller\CreateTokenController;
+use Nearata\TwoFactor\Api\Controller\EmailCreateController;
+use Nearata\TwoFactor\Api\Controller\EmailDeleteController;
+use Nearata\TwoFactor\Api\Controller\EmailSendCodeController;
 use Nearata\TwoFactor\Api\Controller\TwoFactorController;
 use Nearata\TwoFactor\Api\Serializer\TwoFactorSerializer;
 use Nearata\TwoFactor\Forum\Controller\LogInController;
@@ -35,14 +38,18 @@ return [
         ->get('/nearata/twofactor/app', 'nearata-twofactor.app.init', AppInitController::class)
         ->post('/nearata/twofactor/app', 'nearata-twofactor.app.create', AppCreateController::class)
         ->delete('/nearata/twofactor/app', 'nearata-twofactor.app.delete', AppDeleteController::class)
-        ->post('/nearata/twofactor/app/backups', 'nearata-twofactor.app.backups', AppBackupsController::class),
+        ->post('/nearata/twofactor/app/backups', 'nearata-twofactor.app.backups', AppBackupsController::class)
+        ->post('/nearata/twofactor/email', 'nearata-twofactor.email-create', EmailCreateController::class)
+        ->delete('/nearata/twofactor/email', 'nearata-twofactor.email-delete', EmailDeleteController::class)
+        ->post('/nearata/twofactor/email/sendCode', 'nearata-twofactor.email-sendcode', EmailSendCodeController::class),
 
     (new Extend\Routes('forum'))
         ->remove('login')
         ->post('/login', 'login', LogInController::class),
 
     (new Extend\Settings())
-        ->default('nearata-twofactor.appNumberOfGeneratedBackupCodes', 5),
+        ->default('nearata-twofactor.appNumberOfGeneratedBackupCodes', 5)
+        ->default('nearata-twofactor.emailCodeExpireTimeMinutes', 2),
 
     (new Extend\ApiSerializer(CurrentUserSerializer::class))
         ->hasMany('twoFactor', TwoFactorSerializer::class),
@@ -58,5 +65,11 @@ return [
         ->register(TwoFactorServiceProvider::class),
 
     (new Extend\ErrorHandling)
-        ->status('twofactor_login_init', 401)
+        ->status('twofactor_login_init', 401),
+
+    (new Extend\View)
+        ->namespace('nearata-twofactor', __DIR__.'/views')
+
+    //(new Extend\Notification)
+        //->type(EmailCodeNotificationBlueprint::class, BasicUserSerializer::class, ['email'])
 ];

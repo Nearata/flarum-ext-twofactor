@@ -1,0 +1,79 @@
+<?php
+
+namespace Nearata\TwoFactor\Api\Controller;
+
+use Flarum\Http\RequestUtil;
+use Flarum\Settings\SettingsRepositoryInterface;
+use Flarum\User\Exception\NotAuthenticatedException;
+use Flarum\User\UserRepository;
+use Illuminate\Support\Arr;
+use Laminas\Diactoros\Response\EmptyResponse;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Contracts\Queue\Queue;
+use Illuminate\Contracts\Validation\Factory as ValidationFactory;
+use Illuminate\Validation\ValidationException;
+use Nearata\TwoFactor\EmailProvider;
+use Nearata\TwoFactor\EmailSendCodeNotificationJob;
+use Nearata\TwoFactor\Notifications\EmailCodeNotificationBlueprint;
+
+class EmailSendCodeController implements RequestHandlerInterface
+{
+    public function __construct(
+        protected UserRepository $users,
+        protected CacheRepository $cache,
+        protected SettingsRepositoryInterface $settings,
+        protected EmailProvider $emailProvider,
+        protected Queue $queue,
+        protected ValidationFactory $validationFactory)
+    {
+    }
+
+    public function handle(ServerRequestInterface $request): ResponseInterface
+    {
+        $actor = RequestUtil::getActor($request);
+        $body = $request->getParsedBody();
+
+        // user is logging in
+        if ($actor->isGuest()) {
+            $identification = Arr::get($body, 'identification');
+            $password = Arr::get($body, 'password');
+
+            $actor = $this->users->findByIdentification($identification);
+
+            if (is_null($actor) || ! $actor->checkPassword($password)) {
+                throw new NotAuthenticatedException();
+            }
+        }
+
+        $email = $actor->twoFactor()->where('type', 'email')->first()->secret;
+
+        // user is configuring
+        if (is_null($email)) {
+            $email = Arr::get($body, 'email');
+
+            $validator = $this->validationFactory->make($body, [
+                'email' => ['required', 'email']
+            ]);
+
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+        }
+
+        $passcode = $this->emailProvider->generatePasscode($actor);
+
+        /**
+         * @todo: i dont need entries in database
+         * they would never be deleted if not done
+         * manually and with this i can send to
+         * the email i want dont know if better
+         * alternatives exist
+         */
+        $this->queue->push(new EmailSendCodeNotificationJob(new EmailCodeNotificationBlueprint($actor, $passcode), $actor, $email));
+
+        return new EmptyResponse();
+    }
+}

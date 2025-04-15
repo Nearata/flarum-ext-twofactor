@@ -1,9 +1,7 @@
-import Modal, { IInternalModalAttrs } from "flarum/common/components/Modal";
+import Modal from "flarum/common/components/Modal";
 import app from "flarum/forum/app";
-import SetupAppState from "../states/SetupAppState"
 import type Mithril from "mithril"
 import AppSetupState, { BackupsResponse } from "../states/AppSetupState";
-import TwoFactor from "../models/TwoFactor";
 import Button from "flarum/common/components/Button";
 import AppSetupSuccess from "./AppSetupSuccess";
 import LoadingIndicator from "flarum/common/components/LoadingIndicator";
@@ -15,7 +13,6 @@ export default class AppSetupModal extends Modal {
   protected static readonly isDismissibleViaEscKey: boolean = false;
   protected static readonly isDismissibleViaBackdropClick: boolean = false;
 
-
   setupState = new AppSetupState()
 
   oninit(vnode: Mithril.Vnode<this>) {
@@ -24,7 +21,7 @@ export default class AppSetupModal extends Modal {
   }
 
   className() {
-    return "NearataTwoFactor SetupAuthenticationApp Modal--small";
+    return "NearataTwoFactor AppSetup Modal--small";
   }
 
   title() {
@@ -43,19 +40,6 @@ export default class AppSetupModal extends Modal {
             {this.setupState.success && <AppSetupSuccess setupState={this.setupState} />}
             {!this.setupState.success && !this.setupState.enabled && <AppSetupQrcode setupState={this.setupState} />}
             {!this.setupState.success && this.setupState.enabled && <p>{trans("app_setup_enter_code_disable")}</p>}
-            {
-              /*this.setupState.success ? <AppSetupSuccess setupState={this.setupState} /> : (
-                this.setupState.enabled && <p>{trans("app_setup_enter_code_disable")}</p>,
-                !this.setupState.enabled && <AppSetupQrcode setupState={this.setupState} />
-              )*/
-            }
-            {
-              /*this.setupState.success ? <AppSetupSuccess setupState={this.setupState} /> : (
-                this.setupState.enabled ? (
-                  <p>{trans("app_setup_enter_code_disable")}</p>
-                ) : <AppSetupQrcode setupState={this.setupState} />
-              )*/
-            }
           </div>
           {
             !this.setupState.success && (
@@ -125,7 +109,7 @@ export default class AppSetupModal extends Modal {
 
   requestEnabling() {
     app
-      .request<any>({
+      .request<BackupsResponse>({
         url: `${app.forum.attribute("apiUrl")}/nearata/twofactor/app`,
         method: "POST",
         body: {
@@ -135,7 +119,7 @@ export default class AppSetupModal extends Modal {
         },
         errorHandler: this.onerror.bind(this),
       })
-      .then(async (r: BackupsResponse) => {
+      .then(async (r) => {
         this.setupState.backups.push(...r.codes)
         await this.setupState.refresh();
         this.setupState.success = true;
@@ -146,7 +130,7 @@ export default class AppSetupModal extends Modal {
 
   requestDisabling() {
     app
-      .request<any>({
+      .request<void>({
         url: `${app.forum.attribute("apiUrl")}/nearata/twofactor/app`,
         method: "DELETE",
         body: {

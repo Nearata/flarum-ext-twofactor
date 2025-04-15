@@ -13,6 +13,16 @@ app.initializers.add("nearata-twofactor", () => {
         min: "0"
       }
     )
+    .registerSetting(
+      {
+        setting: "nearata-twofactor.emailCodeExpireTimeMinutes",
+        type: "number",
+        label: app.translator.trans(
+          "nearata-twofactor.admin.settings.email_code_expire_time_minutes"
+        ),
+        min: "1"
+      }
+    )
     .registerPermission(
       {
         icon: "fas fa-shield-alt",
