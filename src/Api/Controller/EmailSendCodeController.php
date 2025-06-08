@@ -16,7 +16,7 @@ use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 use Illuminate\Validation\ValidationException;
 use Nearata\TwoFactor\EmailProvider;
-use Nearata\TwoFactor\EmailSendCodeNotificationJob;
+use Nearata\TwoFactor\Jobs\EmailSendCodeNotificationJob;
 use Nearata\TwoFactor\Notifications\EmailCodeNotificationBlueprint;
 
 class EmailSendCodeController implements RequestHandlerInterface
@@ -48,13 +48,12 @@ class EmailSendCodeController implements RequestHandlerInterface
             }
         }
 
-        $email = $actor->twoFactor()->where('type', 'email')->first()->secret;
+        $email = $actor->twoFactor()->where('type', 'email')->value('secret');
 
         // user is configuring
         if (is_null($email)) {
             $email = Arr::get($body, 'email');
-
-            $validator = $this->validationFactory->make($body, [
+            $validator = $this->validationFactory->make(['email' => $email], [
                 'email' => ['required', 'email']
             ]);
 

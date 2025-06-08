@@ -6,35 +6,50 @@ import type Mithril from "mithril";
 import icon from "flarum/common/helpers/icon"
 import Button from "flarum/common/components/Button";
 import AppSetupModal from "./AppSetupModal";
-import trans from "../helpers/trans";
 import EmailSetupModal from "./EmailSetupModal";
+import RecoverySetupModal from "./RecoverySetupModal";
+import { providers } from "./Providers";
+import { forumTranslator as trans } from "../helpers/trans";
+import LoadingIndicator from "flarum/common/components/LoadingIndicator";
+import TwoFactor from "../models/TwoFactor";
 
 export default class TwoFactorItems extends Component {
-  data = [
-    {
-      key: "app",
-      icon: icon("fas fa-mobile-alt"),
-      title: trans("app_item_label"),
-      desc: trans("app_item_description"),
-      modal: AppSetupModal
-    },
-    {
-      key: "email",
-      icon: icon("fas fa-envelope-open"),
-      title: trans("email_item_label"),
-      desc: trans("email_item_description"),
-      modal: EmailSetupModal
-    }
-  ]
+  loading = true
+
+  oninit(vnode: Mithril.Vnode<this>): void {
+    super.oninit(vnode)
+
+    app.store.find<TwoFactor[]>("nearata/twofactor")
+      .then((r) => {
+        const lst = r.map(val => val.type())
+
+        for (const i of app.store.all<TwoFactor>("twoFactor")) {
+          if (!lst.includes(i.type())) {
+            app.store.remove(i)
+          }
+        }
+      })
+      .finally(() => {
+        this.loading = false
+        m.redraw()
+      })
+  }
 
   view(_: Mithril.Vnode<this>) {
     return (
       <FieldSet
         className="UserSecurityPage-nearataTwoFactor"
-        label={trans("section_title")}
+        label={trans("settings.section_title")}
       >
-        <span className="helpText">{trans("section_help")}</span>
-        <div className="AccessTokensList">{this.items().toArray()}</div>
+        {
+          this.loading ? <LoadingIndicator /> : [
+            <span className="helpText">{trans("settings.section_help")}</span>,
+            <div className="AccessTokensList">{this.items().toArray()}</div>,
+            !! app.store.all("twoFactor").length && <Button className="Button" icon="fas fa-key" onclick={() => app.modal.show(RecoverySetupModal)}>
+              {trans("settings.recovery_item_button_label")}
+            </Button>
+          ]
+        }
       </FieldSet>
     );
   }
@@ -42,22 +57,28 @@ export default class TwoFactorItems extends Component {
   items() {
     const items = new ItemList();
 
-    for (const i of this.data) {
+    for (const i of providers) {
       items.add(
         i.key,
         <div className="AccessTokensList-item">
-          <div className="AccessTokensList-item-icon">{i.icon}</div>
+          <div className="AccessTokensList-item-icon">{icon(i.icon)}</div>
           <div className="AccessTokensList-item-info">
             <div className="AccessTokensList-item-title">
-              <span className="AccessTokensList-item-title-main">{i.title}</span>
+              <span className="AccessTokensList-item-title-main">{i.title()}</span>
+              {
+                !! app.store.getBy("twoFactor", "type", i.key) && [
+                  ' ',
+                  <span className="AccessTokensList-item-title-sub">{icon("fas fa-check")}</span>
+                ]
+              }
             </div>
             <div className="AccessTokensList-item-description">
-              <span className="AccessTokensList-item-description-main">{i.desc}</span>
+              <span className="AccessTokensList-item-description-main">{i.desc()}</span>
             </div>
           </div>
           <div className="AccessTokensList-item-actions">
-            <Button className="Button Button--primary" onclick={() => app.modal.show(i.modal)}>
-              {trans("item_manage_label")}
+            <Button className="Button Button--primary" onclick={() => app.modal.show(i.setupModal)}>
+              {trans("settings.item_manage_label")}
             </Button>
           </div>
         </div>

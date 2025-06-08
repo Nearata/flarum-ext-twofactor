@@ -2,30 +2,36 @@
 
 namespace Nearata\TwoFactor\Api\Controller;
 
+use Flarum\Api\Controller\AbstractListController;
 use Flarum\Http\RequestUtil;
 use Flarum\User\Exception\NotAuthenticatedException;
 use Flarum\User\UserRepository;
 use Illuminate\Support\Arr;
-use Laminas\Diactoros\Response\JsonResponse;
-use Psr\Http\Message\ResponseInterface;
+use Nearata\TwoFactor\Api\Serializer\TwoFactorSerializer;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Tobscure\JsonApi\Document;
 
-class TwoFactorController implements RequestHandlerInterface
+class TwoFactorController extends AbstractListController
 {
+    public $serializer = TwoFactorSerializer::class;
+
     public function __construct(protected UserRepository $users)
     {
     }
 
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    protected function data(ServerRequestInterface $request, Document $document)
     {
         $actor = RequestUtil::getActor($request);
+
+        if ($request->getMethod() === 'GET') {
+            $actor->assertRegistered();
+        }
 
         if ($actor->isGuest()) {
             $body = $request->getParsedBody();
             $identification = Arr::get($body, 'identification');
             $password = Arr::get($body, 'password');
-            
+
             $actor = $this->users->findByIdentification($identification);
 
             if (is_null($actor) || ! $actor->checkPassword($password)) {
@@ -33,6 +39,6 @@ class TwoFactorController implements RequestHandlerInterface
             }
         }
 
-        return new JsonResponse($actor->twoFactor()->pluck('type')->toArray());
+        return $actor->twoFactor()->get();
     }
 }

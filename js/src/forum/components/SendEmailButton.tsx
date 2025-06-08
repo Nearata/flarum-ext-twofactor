@@ -2,6 +2,7 @@ import Component from "flarum/common/Component";
 import Button from "flarum/common/components/Button";
 import app from "flarum/forum/app";
 import type Mithril from "mithril"
+import { forumTranslator as trans } from "../helpers/trans";
 
 type Attrs = {
   body: Record<string, any>
@@ -16,7 +17,7 @@ export default class SendEmailButton extends Component<Attrs> {
       onclick={this.sendEmail.bind(this)}
       loading={this.loading}
       disabled={this.loading}>
-        {app.translator.trans("nearata-twofactor.forum.email_sendemail_button_label")}
+        {trans("email_sendemail_button_label")}
       </Button>
   }
 
@@ -27,7 +28,7 @@ export default class SendEmailButton extends Component<Attrs> {
       method: "POST",
       body: this.attrs.body
     })
-    .then(() => app.alerts.show({ type: "success" }, app.translator.trans("nearata-twofactor.forum.email_code_sent")))
+    .then(() => app.alerts.show({ type: "success" }, trans("email_code_sent")))
     .finally(() => this.loading = false)
   }
 }

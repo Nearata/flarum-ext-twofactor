@@ -7,10 +7,6 @@ type QRCodeResponse = {
   secret: string;
 };
 
-export type BackupsResponse = {
-  codes: Array<string>;
-};
-
 export default class AppSetupState extends SetupState {
   apiUrl: string = app.forum.attribute("apiUrl");
   manually = false
@@ -18,7 +14,6 @@ export default class AppSetupState extends SetupState {
   passcode: Stream<string> = Stream("")
   qrCode: string = ""
   secret: string = ""
-  backups: Array<string> = []
 
   type() {
     return "app"
@@ -34,18 +29,5 @@ export default class AppSetupState extends SetupState {
         this.qrCode = r.qrcode;
         this.secret = r.secret;
       });
-  }
-
-  async generateBackups() {
-    await app
-      .request<BackupsResponse>({
-        url: `${this.apiUrl}/nearata/twofactor/app/backups`,
-        method: "POST",
-        body: {
-          password: this.password(),
-          passcode: this.passcode()
-        }
-      })
-      .then((r) => this.backups.push(...r.codes));
   }
 }

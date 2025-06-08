@@ -1,12 +1,10 @@
 <?php
 
-namespace Nearata\TwoFactor;
+namespace Nearata\TwoFactor\Contracts;
 
 use Flarum\User\User;
 
 interface AbstractProvider
 {
-    public function type(): string;
-
     public function check(User $user, string $passcode): bool;
 }

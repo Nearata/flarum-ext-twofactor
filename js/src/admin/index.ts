@@ -5,7 +5,7 @@ app.initializers.add("nearata-twofactor", () => {
     .for("nearata-twofactor")
     .registerSetting(
       {
-        setting: "nearata-twofactor.appNumberOfGeneratedBackupCodes",
+        setting: "nearata-twofactor.recoveryCodesGeneratedNumber",
         type: "number",
         label: app.translator.trans(
           "nearata-twofactor.admin.settings.app_number_of_generated_backup_codes"

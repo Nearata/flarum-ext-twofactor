@@ -2,14 +2,17 @@
 
 namespace Nearata\TwoFactor\Api\Controller;
 
-use Flarum\Api\Client;
 use Flarum\Http\RequestUtil;
-use Flarum\Settings\SettingsRepositoryInterface;
-use Flarum\User\Exception\NotAuthenticatedException;
+use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
+use Illuminate\Contracts\Validation\Factory as validationFactory;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
+use Nearata\TwoFactor\AppProvider;
 use Nearata\TwoFactor\Model\TwoFactor;
-use Nearata\TwoFactor\TotpProvider;
+use Nearata\TwoFactor\Rules\PasscodeRule;
+use Nearata\TwoFactor\Rules\PasswordRule;
+use Nearata\TwoFactor\UserTwoFactorUpdatedEvent;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -17,9 +20,9 @@ use Psr\Http\Server\RequestHandlerInterface;
 class AppCreateController implements RequestHandlerInterface
 {
     public function __construct(
-        protected TotpProvider $totp,
-        protected SettingsRepositoryInterface $settings,
-        protected Client $apiClient)
+        protected AppProvider $appProvider,
+        protected validationFactory $validationFactory,
+        protected EventsDispatcher $eventsDispatcher)
     {
     }
 
@@ -33,30 +36,25 @@ class AppCreateController implements RequestHandlerInterface
             return new EmptyResponse(400);
         }
 
-        $body = $request->getParsedBody();
-        $password = Arr::get($body, 'password', '');
-        $secret = Arr::get($body, 'secret', '');
-        $passcode = Arr::get($body, 'passcode', '');
+        $only = Arr::only($request->getParsedBody(), ['password', 'secret', 'passcode']);
+        $validator = $this->validationFactory->make($only, [
+            'password' => ['required', new PasswordRule($actor)],
+            'secret' => ['required'],
+            'passcode' => ['required', new PasscodeRule($actor)]
+        ]);
 
-        if (! $actor->checkPassword($password)) {
-            throw new NotAuthenticatedException();
-        }
-
-        if (! $this->totp->withSecret($secret)->checkPasscode($actor, $passcode)) {
-            throw new NotAuthenticatedException();
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
         }
 
         TwoFactor::insert([
             'user_id' => $actor->id,
             'type' => 'app',
-            'secret' => $secret
+            'secret' => Arr::get($only, 'secret')
         ]);
 
-        $response = $this->apiClient
-            ->withParentRequest($request)
-            ->withBody(Arr::only($body, ['password', 'passcode']))
-            ->post('/nearata/twofactor/app/backups');
+        $this->eventsDispatcher->dispatch(new UserTwoFactorUpdatedEvent($actor));
 
-        return $response;
+        return new EmptyResponse();
     }
 }

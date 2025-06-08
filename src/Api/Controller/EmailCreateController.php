@@ -3,14 +3,17 @@
 namespace Nearata\TwoFactor\Api\Controller;
 
 use Flarum\Http\RequestUtil;
-use Flarum\User\Exception\NotAuthenticatedException;
 use Flarum\User\Exception\PermissionDeniedException;
+use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Nearata\TwoFactor\EmailProvider;
 use Nearata\TwoFactor\Model\TwoFactor;
+use Nearata\TwoFactor\Rules\PasscodeRule;
+use Nearata\TwoFactor\Rules\PasswordRule;
+use Nearata\TwoFactor\UserTwoFactorUpdatedEvent;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -19,7 +22,8 @@ class EmailCreateController implements RequestHandlerInterface
 {
     public function __construct(
         protected EmailProvider $emailProvider,
-        protected ValidationFactory $validationFactory)
+        protected ValidationFactory $validationFactory,
+        protected EventsDispatcher $eventsDispatcher)
     {
     }
 
@@ -33,35 +37,25 @@ class EmailCreateController implements RequestHandlerInterface
             throw new PermissionDeniedException();
         }
 
-        $body = $request->getParsedBody();
-        $email = Arr::get($body, 'email');
-        $password = Arr::get($body, 'password');
-        $passcode = Arr::get($body, 'passcode');
-
-        $validator = $this->validationFactory->make($body, [
+        $only = Arr::only($request->getParsedBody(), ['email', 'password', 'passcode']);
+        $validator = $this->validationFactory->make($only, [
             'email' => ['required', 'email'],
-            'password' => ['required'],
-            'passcode' => ['required', 'digits:6']
+            'password' => ['required', new PasswordRule($actor)],
+            'passcode' => ['required', new PasscodeRule($actor)]
         ]);
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
 
-        if (! $actor->checkPassword($password)) {
-            throw new NotAuthenticatedException();
-        }
-
-        if (! $this->emailProvider->check($actor, $passcode)) {
-            throw new NotAuthenticatedException();
-        }
-
         TwoFactor::insert([
             'user_id' => $actor->id,
             'type' => 'email',
-            'secret' => $email
+            'secret' => Arr::get($only, 'email')
         ]);
 
-        return new EmptyResponse(201);
+        $this->eventsDispatcher->dispatch(new UserTwoFactorUpdatedEvent($actor));
+
+        return new EmptyResponse();
     }
 }

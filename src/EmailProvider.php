@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Nearata\TwoFactor\Contracts\AbstractProvider;
 
 class EmailProvider implements AbstractProvider
 {
@@ -13,11 +14,6 @@ class EmailProvider implements AbstractProvider
         protected CacheRepository $cache,
         protected SettingsRepositoryInterface $settings)
     {
-    }
-
-    public function type(): string
-    {
-        return 'email';
     }
 
     public function check(User $user, string $passcode): bool

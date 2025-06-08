@@ -1,9 +1,9 @@
 import Component from "flarum/common/Component";
 import type Mithril from "mithril"
-import trans from "../helpers/trans";
 import AppSetupState from "../states/AppSetupState";
 import load from "external-load"
 import LoadingIndicator from "flarum/common/components/LoadingIndicator";
+import { forumTranslator as trans } from "../helpers/trans";
 
 export default class AppSetupQrcode extends Component {
   loading = true
@@ -26,15 +26,15 @@ export default class AppSetupQrcode extends Component {
 
     return (
       <>
-        <p>{trans("app_setup_scan_qr")}</p>
-        <p><canvas class="QRCode" oncreate={this.render.bind(this)}></canvas></p>
+        <p>{trans("settings.app_setup_scan_qr")}</p>
+        <p><canvas className="QRCode" oncreate={this.render.bind(this)}></canvas></p>
         {this.setupState.manually ? (
-          <p class="message">
+          <p className="message">
             <code>{this.setupState.secret}</code>
           </p>
         ) : (
           <a onclick={() => (this.setupState.manually = true)}>
-            {trans("app_setup_enter_code_manually")}
+            {trans("settings.app_setup_enter_code_manually")}
           </a>
         )}
       </>

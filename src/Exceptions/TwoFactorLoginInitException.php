@@ -1,6 +1,6 @@
 <?php
 
-namespace Nearata\TwoFactor;
+namespace Nearata\TwoFactor\Exceptions;
 
 use Exception;
 use Flarum\Foundation\KnownError;

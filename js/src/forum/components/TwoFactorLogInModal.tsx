@@ -5,13 +5,12 @@ import app from "flarum/forum/app";
 import type Mithril from "mithril";
 import LoadingIndicator from "flarum/common/components/LoadingIndicator";
 import { LoginParams } from "flarum/common/Session";
-import LoginState from "../states/LoginState";
-import AppLoginState from "../states/AppLoginState";
-import EmailLoginState from "../states/EmailLoginState";
-
-export const trans = (key: string, params = {}) => {
-  return app.translator.trans(`nearata-twofactor.forum.login.${key}`, params);
-};
+import FormButtonSubmit from "./FormButtonSubmit";
+import FormPasscode from "./FormPasscode";
+import SendEmailButton from "./SendEmailButton";
+import Stream from "flarum/common/utils/Stream";
+import { forumTranslator as trans } from "../helpers/trans";
+import { providers } from "./Providers";
 
 interface Attrs extends IInternalModalAttrs {
   loginParams: LoginParams
@@ -21,8 +20,9 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
   protected static readonly isDismissibleViaEscKey = false;
   protected static readonly isDismissibleViaBackdropClick = false;
 
-  loginState!: LoginState
   types: Array<string> = []
+  passcode: Stream<string> = Stream("")
+  type: Stream<string> = Stream("")
 
   oninit(vnode: Mithril.Vnode<this>) {
     super.oninit(vnode);
@@ -34,7 +34,7 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
   }
 
   title() {
-    return trans("title");
+    return trans("login.title");
   }
 
   content() {
@@ -42,59 +42,41 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
       return <LoadingIndicator />
     }
 
-    const types: Record<string, any> = {
-      "app": {
-        icon: "fas fa-mobile-alt",
-        loginState: AppLoginState
-      },
-      "email": {
-        icon: "fas fa-envelope-open",
-        loginState: EmailLoginState
-      }
-    }
-
-    return [
+    return (
       <div class="Modal-body">
         <div className="LogInButtons">
           {
-            this.types.map(val => {
-              const type = types[val]
-              const title = trans(`${val}_button_label`)
+            this.types.length > 1 && providers.filter(val => this.types.includes(val.key)).map(val => {
               return <Button
                 className={`Button LogInButton LogInButton--${val}`}
-                icon={type.icon}
-                aria-label={title}
-                onclick={() => {
-                  this.loginState = new type.loginState(this.attrs.loginParams)
-                }}
-                disabled={this.loginState?.type() === val}>
-                  {title}
+                icon={val.icon}
+                aria-label={val.title()}
+                onclick={() => this.type(val.key)}
+                disabled={this.type() === val.key}>
+                  {val.title()}
                 </Button>
             })
           }
         </div>
         <div class="Form Form--centered">
-          {this.loginState?.form()}
-          <div class="Form-group">
-            <Button
-              class="Button Button--primary Button--block"
-              type="submit"
-              loading={this.loading}
-              disabled={!!! this.loginState || this.loginState.loading || this.loading}
-            >
-              {trans("submit_button_label")}
-            </Button>
-          </div>
+          <fieldset disabled={this.loading || this.type() === ''}>
+            <FormPasscode bidi={this.passcode} />
+            <FormButtonSubmit loading={this.loading}>{trans("login.submit_button_label")}</FormButtonSubmit>
+            {
+              this.type() === 'email' && (
+                <div className="Form-group"><SendEmailButton body={this.loginParams()} /></div>
+              )
+            }
+          </fieldset>
         </div>
       </div>
-    ];
+    )
   }
 
   loginParams() {
     const data = {
       ...this.attrs.loginParams,
-      "2FAType": this.loginState.type(),
-      "2FACode": this.loginState.passcode(),
+      "2FACode": this.passcode(),
     };
 
     return data;
@@ -102,12 +84,18 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
 
   loadTypes() {
     this.loading = true
-    app.request<Array<string>>({
+    app.request<Record<string, Array<any>>>({
       url: `${app.forum.attribute("apiUrl")}/nearata/twofactor`,
       method: "POST",
       body: this.attrs.loginParams
     })
-    .then((r) => this.types.push(...r))
+    .then((r) => {
+      this.types.push(...r.data.map(val => val.attributes.type))
+
+      if (this.types.length === 1) {
+        this.type(this.types[0])
+      }
+    })
     .finally(this.loaded.bind(this));
   }
 
@@ -123,11 +111,6 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
   }
 
   onerror(error: RequestError) {
-    if (error.status === 401 && error.alert) {
-      error.alert.content = trans("invalid_passcode");
-      this.loading = false;
-    }
-
     super.onerror(error);
   }
 }

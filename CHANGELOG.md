@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - authenticator app: replace FileSaver.js with plain js
 - fix some of the user settings being exposed to others [issue #10](https://github.com/Nearata/flarum-ext-twofactor/issues/15) [pull #15](https://github.com/Nearata/flarum-ext-twofactor/pull/16)
 - add authentication by email [issue #6](https://github.com/Nearata/flarum-ext-twofactor/issues/6)
+- backup codes no longer depend on the authenticator app, no longer auto-generate, user dependant
+- fire `UserTwoFactorUpdatedEvent` on user two factor updates
 
 ## [2.2.1] - 2023-06-18
 

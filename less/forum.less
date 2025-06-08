@@ -1,8 +1,10 @@
 .NearataTwoFactor {
-  &.AppSetup {
-    .message {
+  &.AppSetup,
+  &.RecoverySetup {
+    .message,
+    .Codes-message {
       border: 0;
-      padding: 15px;
+      padding: 1rem;
       background: @code-bg;
       color: #666;
       font-size: 90%;
@@ -14,17 +16,24 @@
         font-size: 14px;
       }
     }
+  }
 
-    .Backups-list {
+  &.RecoverySetup {
+    .Codes-list {
       display: grid;
       grid-template-columns: auto auto;
       gap: 0 1rem;
     }
 
-    .Backups-export {
+    .Codes-export {
       display: grid;
-      grid-auto-flow: column;
       gap: 1rem;
     }
+  }
+}
+
+.UserSecurityPage-nearataTwoFactor {
+  .AccessTokensList-item-title-sub > .fas.fa-check {
+    color: #008000
   }
 }

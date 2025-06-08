@@ -3,13 +3,16 @@
 namespace Nearata\TwoFactor\Api\Controller;
 
 use Flarum\Http\RequestUtil;
-use Flarum\User\Exception\NotAuthenticatedException;
 use Flarum\User\Exception\PermissionDeniedException;
+use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Nearata\TwoFactor\EmailProvider;
+use Nearata\TwoFactor\Rules\PasscodeRule;
+use Nearata\TwoFactor\Rules\PasswordRule;
+use Nearata\TwoFactor\UserTwoFactorUpdatedEvent;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -18,41 +21,34 @@ class EmailDeleteController implements RequestHandlerInterface
 {
     public function __construct(
         protected ValidationFactory $validationFactory,
-        protected EmailProvider $emailProvider)
+        protected EmailProvider $emailProvider,
+        protected EventsDispatcher $eventsDispatcher)
     {
-
     }
+
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $actor = RequestUtil::getActor($request);
         $actor->assertRegistered();
 
-        if (! $actor->twoFactor()->where('type', 'email')->exists()) {
+        $email = $actor->twoFactor()->where('type', 'email');
+        if (! $email->exists()) {
             throw new PermissionDeniedException();
         }
 
-        $body = $request->getParsedBody();
-        $password = Arr::get($body, 'password');
-        $passcode = Arr::get($body, 'passcode');
-
-        $validator = $this->validationFactory->make($body, [
-            'password' => ['required'],
-            'passcode' => ['required', 'digits:6']
+        $only = Arr::only($request->getParsedBody(), ['password', 'passcode']);
+        $validator = $this->validationFactory->make($only, [
+            'password' => ['required', new PasswordRule($actor)],
+            'passcode' => ['required', new PasscodeRule($actor)]
         ]);
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
 
-        if (! $actor->checkPassword($password)) {
-            throw new NotAuthenticatedException();
-        }
+        $email->delete();
 
-        if (! $this->emailProvider->check($actor, $passcode)) {
-            throw new NotAuthenticatedException();
-        }
-
-        $actor->twoFactor()->where('type', 'email')->delete();
+        $this->eventsDispatcher->dispatch(new UserTwoFactorUpdatedEvent($actor));
 
         return new EmptyResponse();
     }

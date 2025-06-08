@@ -1,12 +1,16 @@
 import Modal from "flarum/common/components/Modal";
-import trans from "../helpers/trans";
 import EmailSetupState from "../states/EmailSetupState";
 import RequestError from "flarum/common/utils/RequestError";
-import Button from "flarum/common/components/Button";
 import app from "flarum/forum/app";
 import LoadingIndicator from "flarum/common/components/LoadingIndicator";
 import type Mithril from "mithril";
 import SendEmailButton from "./SendEmailButton";
+import Form from "./Form";
+import FormButtonSubmit from "./FormButtonSubmit";
+import FormPassword from "./FormPassword";
+import FormPasscode from "./FormPasscode";
+import FormButtonClose from "./FormButtonClose";
+import { forumTranslator as trans } from "../helpers/trans";
 
 export default class EmailSetupModal extends Modal {
   protected static readonly isDismissibleViaEscKey: boolean = false;
@@ -24,7 +28,7 @@ export default class EmailSetupModal extends Modal {
   }
 
   title() {
-    return trans("email_setup_title");
+    return trans("settings.email_setup_title");
   }
 
   content() {
@@ -32,84 +36,49 @@ export default class EmailSetupModal extends Modal {
       return <LoadingIndicator />;
     }
 
-    if (this.setupState.success) {
-      return (
-        <div class="Modal-body">
-          <p>
-            {
-              this.setupState.enabled
-                ? trans("email_setup_success_enable")
-                : trans("email_setup_success_disable")
-            }
-          </p>
-        </div>
-      )
-    }
-
     return (
-      <div class="Modal-body">
-        <div class="Form Form--centered">
-          {
+      <Form disabled={this.loading}>
+        {
+          this.setupState.success ? [
+            <p>
+              {
+                this.setupState.enabled
+                  ? trans("settings.email_setup_success_enable")
+                  : trans("settings.email_setup_success_disable")
+              }
+            </p>,
+            <FormButtonClose onclick={this.hide.bind(this)} />
+          ] : [
             !this.setupState.enabled && (
-              <div class="Form-group">
-                <span className="helpText">{trans("email_setup_identification_helptext")}</span>
+              <div className="Form-group">
+                <span className="helpText">{trans("settings.email_setup_identification_helptext")}</span>
                 <input
-                  class="FormControl"
+                  className="FormControl"
                   type="text"
-                  placeholder={trans("email_setup_identification_placeholder")}
+                  placeholder={trans("settings.email_setup_identification_placeholder")}
+                  aria-label={trans("settings.email_setup_identification_placeholder")}
                   name="email"
                   autocomplete="off"
                   bidi={this.setupState.email}
-                  disabled={this.loading}
                 />
               </div>
-            )
-          }
-          <div class="Form-group">
-            <input
-              class="FormControl"
-              type="password"
-              placeholder={trans("email_setup_password_placeholder")}
-              name="password"
-              autocomplete="off"
-              bidi={this.setupState.password}
-              disabled={this.loading}
-            />
-          </div>
-          <div class="Form-group">
-            <span className="helpText">{trans("email_setup_passcode_helptext")}</span>
-            <input
-              class="FormControl"
-              type="text"
-              placeholder={trans("email_setup_passcode_placeholder")}
-              name="otp"
-              autocomplete="off"
-              bidi={this.setupState.passcode}
-              disabled={this.loading}
-            />
-          </div>
-          <div class="Form-group">
-            <Button
-              class="Button Button--primary Button--block"
-              type="submit"
-              onclick={this.setupState.success && this.hide.bind(this)}
-              loading={!this.setupState.success && this.loading}
-            >
-              {this.setupState.success && trans("modal_close_button_label")}
+            ),
+            <FormPassword bidi={this.setupState.password} />,
+            <span className="helpText">{trans("settings.email_setup_passcode_helptext")}</span>,
+            <FormPasscode bidi={this.setupState.passcode} />,
+            <FormButtonSubmit loading={this.loading}>
               {
-                !this.setupState.success && (
-                  this.setupState.enabled
-                    ? trans("app_setup_button_label_disable")
-                    : trans("app_setup_button_label_enable")
-                )
+                this.setupState.enabled
+                  ? trans("settings.modal_disable_button_label")
+                  : trans("settings.modal_enable_button_label")
               }
-            </Button>
-          </div>
-          <div className="Form-group">
-            <SendEmailButton body={{"email": this.setupState.email}} />
-          </div>
-        </div>
-      </div>
+            </FormButtonSubmit>,
+            <div className="Form-group">
+              <SendEmailButton body={{"email": this.setupState.email}} />
+            </div>
+          ]
+        }
+      </Form>
     )
   }
 
@@ -119,18 +88,10 @@ export default class EmailSetupModal extends Modal {
     this.loading = true
     this.alertAttrs = null
 
-    if (this.setupState.enabled) {
-      this.requestDisable()
-    } else {
-      this.requestEnable()
-    }
-  }
-
-  requestEnable() {
     app
       .request<void>({
         url: `${app.forum.attribute("apiUrl")}/nearata/twofactor/email`,
-        method: "POST",
+        method: this.setupState.enabled ? "DELETE" : "POST",
         body: {
           passcode: this.setupState.passcode(),
           password: this.setupState.password(),
@@ -142,33 +103,13 @@ export default class EmailSetupModal extends Modal {
         await this.setupState.refresh();
         this.setupState.success = true;
       })
-      .catch(() => {})
-      .finally(this.loaded.bind(this));
-  }
-
-  requestDisable() {
-    app
-      .request<void>({
-        url: `${app.forum.attribute("apiUrl")}/nearata/twofactor/email`,
-        method: "DELETE",
-        body: {
-          passcode: this.setupState.passcode(),
-          password: this.setupState.password(),
-        },
-        errorHandler: this.onerror.bind(this),
-      })
-      .then(async () => {
-        await this.setupState.refresh();
-        this.setupState.success = true;
-      })
-      .catch(() => {})
       .finally(this.loaded.bind(this));
   }
 
   onerror(error: RequestError) {
-    super.onerror(error);
-
     this.setupState.passcode("")
     this.setupState.password("")
+
+    super.onerror(error);
   }
 }

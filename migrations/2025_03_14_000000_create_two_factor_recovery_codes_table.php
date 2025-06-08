@@ -6,10 +6,9 @@ use Illuminate\Support\Collection;
 
 return [
     'up' => function (Builder $schema) {
-        $schema->create('two_factor_backup_codes', function (Blueprint $table) {
+        $schema->create('two_factor_recovery_codes', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id')->unsigned();
-            $table->string('type', 10);
             $table->string('code', 255);
             $table->timestamp('created_at')->useCurrent();
 
@@ -28,9 +27,8 @@ return [
                 $codes = json_decode($user->twofa_app_codes);
 
                 foreach($codes as $code) {
-                    $schema->getConnection()->table('two_factor_backup_codes')->insert([
+                    $schema->getConnection()->table('two_factor_recovery_codes')->insert([
                         'user_id' => $user->user_id,
-                        'type' => 'app',
                         'code' => password_hash($code, null)
                     ]);
                 }
@@ -38,6 +36,6 @@ return [
           });
     },
     'down' => function (Builder $schema) {
-        $schema->drop('two_factor_backup_codes');
+        $schema->drop('two_factor_recovery_codes');
     }
 ];

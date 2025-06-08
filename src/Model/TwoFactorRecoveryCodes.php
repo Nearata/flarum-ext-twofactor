@@ -9,19 +9,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $user_id
- * @property string $type
  * @property string $code
  * @property \Carbon\Carbon $created_at
  *
  * @property-read User $user
  */
-class TwoFactorBackupCodes extends AbstractModel
+class TwoFactorRecoveryCodes extends AbstractModel
 {
-    protected $table = 'two_factor_backup_codes';
+    protected $table = 'two_factor_recovery_codes';
 
     protected $dates = ['created_at'];
 
-    protected $fillable = ['user_id', 'type', 'code'];
+    protected $fillable = ['user_id', 'code'];
 
     public function user(): BelongsTo
     {

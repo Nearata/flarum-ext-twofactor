@@ -1,13 +1,17 @@
 import Modal from "flarum/common/components/Modal";
 import app from "flarum/forum/app";
 import type Mithril from "mithril"
-import AppSetupState, { BackupsResponse } from "../states/AppSetupState";
-import Button from "flarum/common/components/Button";
+import AppSetupState from "../states/AppSetupState";
 import AppSetupSuccess from "./AppSetupSuccess";
 import LoadingIndicator from "flarum/common/components/LoadingIndicator";
-import trans from "../helpers/trans";
 import AppSetupQrcode from "./AppSetupQrcode";
 import RequestError from "flarum/common/utils/RequestError";
+import Form from "./Form";
+import FormButtonClose from "./FormButtonClose";
+import FormButtonSubmit from "./FormButtonSubmit";
+import FormPassword from "./FormPassword";
+import FormPasscode from "./FormPasscode";
+import { forumTranslator as trans } from "../helpers/trans";
 
 export default class AppSetupModal extends Modal {
   protected static readonly isDismissibleViaEscKey: boolean = false;
@@ -25,7 +29,7 @@ export default class AppSetupModal extends Modal {
   }
 
   title() {
-    return trans("app_setup_title");
+    return trans("settings.app_setup_title");
   }
 
   content() {
@@ -34,108 +38,44 @@ export default class AppSetupModal extends Modal {
     }
 
     return (
-      <div class="Modal-body">
-        <div class="Form Form--centered">
-          <div class="Form-group">
-            {this.setupState.success && <AppSetupSuccess setupState={this.setupState} />}
-            {!this.setupState.success && !this.setupState.enabled && <AppSetupQrcode setupState={this.setupState} />}
-            {!this.setupState.success && this.setupState.enabled && <p>{trans("app_setup_enter_code_disable")}</p>}
-          </div>
-          {
-            !this.setupState.success && (
-              <>
-                <div class="Form-group">
-                  <input
-                    class="FormControl"
-                    type="password"
-                    placeholder={trans("app_setup_password_placeholder")}
-                    name="password"
-                    autocomplete="off"
-                    bidi={this.setupState.password}
-                    disabled={this.loading}
-                  />
-                </div>
-                <div class="Form-group">
-                  <input
-                    class="FormControl"
-                    type="text"
-                    placeholder={trans("app_setup_passcode_placeholder")}
-                    name="otp"
-                    autocomplete="off"
-                    bidi={this.setupState.passcode}
-                    disabled={this.loading}
-                  />
-                </div>
-              </>
-            )
-          }
-          <div class="Form-group">
-            <Button
-              class="Button Button--primary Button--block"
-              type="submit"
-              onclick={this.setupState.success && this.hide.bind(this)}
-              loading={!this.setupState.success && this.loading}
-            >
-              {
-                this.setupState.success ? trans("app_setup_close_button_label") : (
-                  this.setupState.enabled
-                    ? trans("app_setup_button_label_disable")
-                    : trans("app_setup_button_label_enable")
-                )
-              }
-            </Button>
-          </div>
+      <Form disabled={this.loading}>
+        <div className="Form-group">
+          {this.setupState.success && <AppSetupSuccess setupState={this.setupState} />}
+          {!this.setupState.success && !this.setupState.enabled && <AppSetupQrcode setupState={this.setupState} />}
+          {!this.setupState.success && this.setupState.enabled && <p>{trans("settings.app_setup_enter_code_disable")}</p>}
         </div>
-      </div>
+        {this.setupState.success && <FormButtonClose onclick={this.hide.bind(this)} />}
+        {
+          !this.setupState.success && [
+            <FormPassword bidi={this.setupState.password} />,
+            <FormPasscode bidi={this.setupState.passcode} />,
+            <FormButtonSubmit loading={this.loading}>
+              {
+                this.setupState.enabled
+                  ? trans("settings.modal_disable_button_label")
+                  : trans("settings.modal_enable_button_label")
+              }
+            </FormButtonSubmit>
+          ]
+        }
+      </Form>
     )
   }
 
   onsubmit(e: SubmitEvent) {
     e.preventDefault();
 
-    if (this.setupState.success) {
-      return
-    }
-
     this.loading = true
     this.alertAttrs = null
 
-    if (this.setupState.enabled) {
-      this.requestDisabling()
-    } else {
-      this.requestEnabling()
-    }
-  }
-
-  requestEnabling() {
-    app
-      .request<BackupsResponse>({
-        url: `${app.forum.attribute("apiUrl")}/nearata/twofactor/app`,
-        method: "POST",
-        body: {
-          passcode: this.setupState.passcode(),
-          password: this.setupState.password(),
-          secret: this.setupState.secret,
-        },
-        errorHandler: this.onerror.bind(this),
-      })
-      .then(async (r) => {
-        this.setupState.backups.push(...r.codes)
-        await this.setupState.refresh();
-        this.setupState.success = true;
-      })
-      .catch(() => {})
-      .finally(this.loaded.bind(this));
-  }
-
-  requestDisabling() {
     app
       .request<void>({
         url: `${app.forum.attribute("apiUrl")}/nearata/twofactor/app`,
-        method: "DELETE",
+        method: this.setupState.enabled ? "DELETE" : "POST",
         body: {
           passcode: this.setupState.passcode(),
           password: this.setupState.password(),
+          secret: this.setupState.secret
         },
         errorHandler: this.onerror.bind(this),
       })
@@ -143,17 +83,12 @@ export default class AppSetupModal extends Modal {
         await this.setupState.refresh();
         this.setupState.success = true;
       })
-      .catch(() => {})
       .finally(this.loaded.bind(this));
   }
 
   onerror(error: RequestError) {
-    if (error.status === 401 && error.alert) {
-      error.alert.content = trans("app_setup_invalid_passcode");
-
-      this.setupState.password("");
-      this.setupState.passcode("");
-    }
+    this.setupState.password("");
+    this.setupState.passcode("");
 
     super.onerror(error);
   }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Nearata\TwoFactor;
+namespace Nearata\TwoFactor\Jobs;
 
 use Flarum\Notification\MailableInterface;
 use Flarum\Queue\AbstractJob;
