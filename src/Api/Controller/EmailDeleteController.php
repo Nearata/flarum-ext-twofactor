@@ -12,7 +12,7 @@ use Laminas\Diactoros\Response\EmptyResponse;
 use Nearata\TwoFactor\EmailProvider;
 use Nearata\TwoFactor\Rules\PasscodeRule;
 use Nearata\TwoFactor\Rules\PasswordRule;
-use Nearata\TwoFactor\UserTwoFactorUpdatedEvent;
+use Nearata\TwoFactor\Listeners\UserTwoFactorUpdatedEvent;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
