@@ -1,6 +1,6 @@
+import SetupState from "./SetupState";
 import Stream from "flarum/common/utils/Stream";
 import app from "flarum/forum/app";
-import SetupState from "./SetupState";
 
 type QRCodeResponse = {
   qrcode: string;
@@ -9,14 +9,14 @@ type QRCodeResponse = {
 
 export default class AppSetupState extends SetupState {
   apiUrl: string = app.forum.attribute("apiUrl");
-  manually = false
-  password: Stream<string> = Stream("")
-  passcode: Stream<string> = Stream("")
-  qrCode: string = ""
-  secret: string = ""
+  manually = false;
+  password: Stream<string> = Stream("");
+  passcode: Stream<string> = Stream("");
+  qrCode: string = "";
+  secret: string = "";
 
   type() {
-    return "app"
+    return "app";
   }
 
   async generateQRCode() {

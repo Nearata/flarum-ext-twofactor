@@ -1,13 +1,13 @@
+import { forumTranslator as trans } from "../helpers/trans";
 import Component from "flarum/common/Component";
-import type Mithril from "mithril"
 import Button from "flarum/common/components/Button";
 import extractText from "flarum/common/utils/extractText";
 import app from "flarum/forum/app";
-import { forumTranslator as trans } from "../helpers/trans";
+import type Mithril from "mithril";
 
 type Attrs = {
-  codes: Array<string>
-}
+  codes: Array<string>;
+};
 
 export default class RecoverySetupBackups extends Component<Attrs> {
   view(vnode: Mithril.Vnode<Attrs, this>) {
@@ -34,7 +34,7 @@ export default class RecoverySetupBackups extends Component<Attrs> {
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   onClickDownload(_: PointerEvent) {
@@ -49,16 +49,16 @@ export default class RecoverySetupBackups extends Component<Attrs> {
       type: "text/plain;charset=utf-8",
     });
 
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.download = "twofactor_recovery_codes.txt";
     a.href = URL.createObjectURL(blob);
-    a.style.display = 'none';
+    a.style.display = "none";
     document.body.append(a);
     a.click();
 
-    new Promise(resolve => {
+    new Promise((resolve) => {
       setTimeout(resolve, 100);
-    })
+    });
 
     a.remove();
   }

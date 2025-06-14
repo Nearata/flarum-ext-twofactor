@@ -1,17 +1,17 @@
-import Component from "flarum/common/Component";
-import type Mithril from "mithril"
-import AppSetupState from "../states/AppSetupState";
-import load from "external-load"
-import LoadingIndicator from "flarum/common/components/LoadingIndicator";
 import { forumTranslator as trans } from "../helpers/trans";
+import AppSetupState from "../states/AppSetupState";
+import load from "external-load";
+import Component from "flarum/common/Component";
+import LoadingIndicator from "flarum/common/components/LoadingIndicator";
+import type Mithril from "mithril";
 
 export default class AppSetupQrcode extends Component {
-  loading = true
-  setupState!: AppSetupState
+  loading = true;
+  setupState!: AppSetupState;
 
   oninit(vnode: Mithril.Vnode<this>): void {
-    super.oninit(vnode)
-    this.setupState = vnode.attrs.setupState
+    super.oninit(vnode);
+    this.setupState = vnode.attrs.setupState;
   }
 
   oncreate(vnode: Mithril.VnodeDOM<this>): void {
@@ -21,13 +21,15 @@ export default class AppSetupQrcode extends Component {
 
   view(_: Mithril.Vnode<this>) {
     if (this.loading) {
-      return <LoadingIndicator />
+      return <LoadingIndicator />;
     }
 
     return (
       <>
         <p>{trans("settings.app_setup_scan_qr")}</p>
-        <p><canvas className="QRCode" oncreate={this.render.bind(this)}></canvas></p>
+        <p>
+          <canvas className="QRCode" oncreate={this.render.bind(this)}></canvas>
+        </p>
         {this.setupState.manually ? (
           <p className="message">
             <code>{this.setupState.secret}</code>
@@ -38,15 +40,15 @@ export default class AppSetupQrcode extends Component {
           </a>
         )}
       </>
-    )
+    );
   }
 
   async load() {
     if (this.setupState.enabled) {
-      return
+      return;
     }
 
-    await this.setupState.generateQRCode()
+    await this.setupState.generateQRCode();
 
     if (typeof window.QRCode === "undefined") {
       await load.js(

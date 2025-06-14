@@ -3,7 +3,7 @@ import TwoFactorLogInModal from "./components/TwoFactorLogInModal";
 import { extend, override } from "flarum/common/extend";
 import app from "flarum/forum/app";
 import LogInModal from "flarum/forum/components/LogInModal";
-import UserSecurityPage from "flarum/forum/components/UserSecurityPage"
+import UserSecurityPage from "flarum/forum/components/UserSecurityPage";
 
 app.initializers.add("nearata-twofactor", () => {
   extend(UserSecurityPage.prototype, "settingsItems", function (items) {
@@ -21,4 +21,4 @@ app.initializers.add("nearata-twofactor", () => {
   });
 });
 
-export { default as extend } from './extend';
+export { default as extend } from "./extend";

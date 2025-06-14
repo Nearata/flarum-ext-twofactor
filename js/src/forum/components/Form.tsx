@@ -1,9 +1,9 @@
 import Component from "flarum/common/Component";
-import type Mithril from "mithril"
+import type Mithril from "mithril";
 
 type Attrs = {
-  disabled: boolean
-}
+  disabled: boolean;
+};
 
 export default class Form extends Component {
   view(vnode: Mithril.Vnode<Attrs, this>) {
@@ -13,6 +13,6 @@ export default class Form extends Component {
           <fieldset disabled={vnode.attrs.disabled}>{vnode.children}</fieldset>
         </div>
       </div>
-    )
+    );
   }
 }
