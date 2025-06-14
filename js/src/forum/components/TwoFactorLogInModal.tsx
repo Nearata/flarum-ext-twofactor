@@ -51,12 +51,12 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
               .map((val) => {
                 return (
                   <Button
-                    className={`Button LogInButton LogInButton--${val}`}
-                    icon={val.icon}
+                    className={`Button LogInButton LogInButton--${val.key} hasIcon`}
                     aria-label={val.title()}
                     onclick={() => this.type(val.key)}
                     disabled={this.type() === val.key}
                   >
+                    {val.icon({"className": "Button-icon"})}
                     {val.title()}
                   </Button>
                 );

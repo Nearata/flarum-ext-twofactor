@@ -68,7 +68,7 @@ export default class TwoFactorItems extends Component {
       items.add(
         i.key,
         <div className="AccessTokensList-item">
-          <div className="AccessTokensList-item-icon">{icon(i.icon)}</div>
+          <div className="AccessTokensList-item-icon">{i.icon()}</div>
           <div className="AccessTokensList-item-info">
             <div className="AccessTokensList-item-title">
               <span className="AccessTokensList-item-title-main">
