@@ -11,13 +11,12 @@ class RecoveryCodesProvider implements AbstractProvider
 {
     public function __construct(
         protected SettingsRepositoryInterface $settings,
-        protected Hasher $hasher)
-    {
-    }
+        protected Hasher $hasher) {}
 
     public function check(User $user, string $passcode): bool
     {
         $model = $user->twoFactorRecoveryCodes()->first();
+
         return $this->hasher->check($passcode, $model->code);
     }
 

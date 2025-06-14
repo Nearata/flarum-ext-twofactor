@@ -6,18 +6,18 @@ use Flarum\Http\RequestUtil;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\Exception\NotAuthenticatedException;
 use Flarum\User\UserRepository;
-use Illuminate\Support\Arr;
-use Laminas\Diactoros\Response\EmptyResponse;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
+use Laminas\Diactoros\Response\EmptyResponse;
 use Nearata\TwoFactor\EmailProvider;
 use Nearata\TwoFactor\Jobs\EmailSendCodeNotificationJob;
 use Nearata\TwoFactor\Notifications\EmailCodeNotificationBlueprint;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 class EmailSendCodeController implements RequestHandlerInterface
 {
@@ -27,9 +27,7 @@ class EmailSendCodeController implements RequestHandlerInterface
         protected SettingsRepositoryInterface $settings,
         protected EmailProvider $emailProvider,
         protected Queue $queue,
-        protected ValidationFactory $validationFactory)
-    {
-    }
+        protected ValidationFactory $validationFactory) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -44,7 +42,7 @@ class EmailSendCodeController implements RequestHandlerInterface
             $actor = $this->users->findByIdentification($identification);
 
             if (is_null($actor) || ! $actor->checkPassword($password)) {
-                throw new NotAuthenticatedException();
+                throw new NotAuthenticatedException;
             }
         }
 
@@ -54,7 +52,7 @@ class EmailSendCodeController implements RequestHandlerInterface
         if (is_null($email)) {
             $email = Arr::get($body, 'email');
             $validator = $this->validationFactory->make(['email' => $email], [
-                'email' => ['required', 'email']
+                'email' => ['required', 'email'],
             ]);
 
             if ($validator->fails()) {
@@ -73,6 +71,6 @@ class EmailSendCodeController implements RequestHandlerInterface
          */
         $this->queue->push(new EmailSendCodeNotificationJob(new EmailCodeNotificationBlueprint($actor, $passcode), $actor, $email));
 
-        return new EmptyResponse();
+        return new EmptyResponse;
     }
 }

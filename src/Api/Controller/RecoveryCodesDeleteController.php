@@ -15,9 +15,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class RecoveryCodesDeleteController implements RequestHandlerInterface
 {
-    public function __construct(protected ValidationFactory $validationFactory)
-    {
-    }
+    public function __construct(protected ValidationFactory $validationFactory) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -25,12 +23,12 @@ class RecoveryCodesDeleteController implements RequestHandlerInterface
         $actor->assertRegistered();
 
         if (! ($actor->twoFactor()->exists() || $actor->twoFactorRecoveryCodes()->exists())) {
-            throw new PermissionDeniedException();
+            throw new PermissionDeniedException;
         }
 
         $body = $request->getParsedBody();
         $validator = $this->validationFactory->make(['password' => Arr::get($body, 'password')], [
-            'password' => ['required', new PasswordRule($actor)]
+            'password' => ['required', new PasswordRule($actor)],
         ]);
 
         if ($validator->fails()) {
@@ -39,6 +37,6 @@ class RecoveryCodesDeleteController implements RequestHandlerInterface
 
         $actor->twoFactorRecoveryCodes()->delete();
 
-        return new EmptyResponse();
+        return new EmptyResponse;
     }
 }

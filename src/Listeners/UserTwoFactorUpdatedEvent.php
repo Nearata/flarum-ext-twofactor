@@ -6,7 +6,5 @@ use Flarum\User\User;
 
 class UserTwoFactorUpdatedEvent
 {
-    public function __construct(public User $actor)
-    {
-    }
+    public function __construct(public User $actor) {}
 }

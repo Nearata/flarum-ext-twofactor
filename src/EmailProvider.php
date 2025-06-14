@@ -12,9 +12,7 @@ class EmailProvider implements AbstractProvider
 {
     public function __construct(
         protected CacheRepository $cache,
-        protected SettingsRepositoryInterface $settings)
-    {
-    }
+        protected SettingsRepositoryInterface $settings) {}
 
     public function check(User $user, string $passcode): bool
     {
@@ -34,6 +32,7 @@ class EmailProvider implements AbstractProvider
         $minutes = (int) $this->settings->get('nearata-twofactor.emailCodeExpireTimeMinutes');
         $passcode = random_int(100000, 999999);
         $this->cache->put($this->key($user), $passcode, Carbon::now()->addMinutes($minutes));
+
         return $passcode;
     }
 

@@ -9,10 +9,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Nearata\TwoFactor\AppProvider;
+use Nearata\TwoFactor\Listeners\UserTwoFactorUpdatedEvent;
 use Nearata\TwoFactor\Model\TwoFactor;
 use Nearata\TwoFactor\Rules\PasscodeRule;
 use Nearata\TwoFactor\Rules\PasswordRule;
-use Nearata\TwoFactor\Listeners\UserTwoFactorUpdatedEvent;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -22,9 +22,7 @@ class AppCreateController implements RequestHandlerInterface
     public function __construct(
         protected AppProvider $appProvider,
         protected validationFactory $validationFactory,
-        protected EventsDispatcher $eventsDispatcher)
-    {
-    }
+        protected EventsDispatcher $eventsDispatcher) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -40,7 +38,7 @@ class AppCreateController implements RequestHandlerInterface
         $validator = $this->validationFactory->make($only, [
             'password' => ['required', new PasswordRule($actor)],
             'secret' => ['required'],
-            'passcode' => ['required', new PasscodeRule($actor)]
+            'passcode' => ['required', new PasscodeRule($actor)],
         ]);
 
         if ($validator->fails()) {
@@ -50,11 +48,11 @@ class AppCreateController implements RequestHandlerInterface
         TwoFactor::insert([
             'user_id' => $actor->id,
             'type' => 'app',
-            'secret' => Arr::get($only, 'secret')
+            'secret' => Arr::get($only, 'secret'),
         ]);
 
         $this->eventsDispatcher->dispatch(new UserTwoFactorUpdatedEvent($actor));
 
-        return new EmptyResponse();
+        return new EmptyResponse;
     }
 }

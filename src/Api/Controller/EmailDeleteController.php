@@ -10,9 +10,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Nearata\TwoFactor\EmailProvider;
+use Nearata\TwoFactor\Listeners\UserTwoFactorUpdatedEvent;
 use Nearata\TwoFactor\Rules\PasscodeRule;
 use Nearata\TwoFactor\Rules\PasswordRule;
-use Nearata\TwoFactor\Listeners\UserTwoFactorUpdatedEvent;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -22,9 +22,7 @@ class EmailDeleteController implements RequestHandlerInterface
     public function __construct(
         protected ValidationFactory $validationFactory,
         protected EmailProvider $emailProvider,
-        protected EventsDispatcher $eventsDispatcher)
-    {
-    }
+        protected EventsDispatcher $eventsDispatcher) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -33,13 +31,13 @@ class EmailDeleteController implements RequestHandlerInterface
 
         $email = $actor->twoFactor()->where('type', 'email');
         if (! $email->exists()) {
-            throw new PermissionDeniedException();
+            throw new PermissionDeniedException;
         }
 
         $only = Arr::only($request->getParsedBody(), ['password', 'passcode']);
         $validator = $this->validationFactory->make($only, [
             'password' => ['required', new PasswordRule($actor)],
-            'passcode' => ['required', new PasscodeRule($actor)]
+            'passcode' => ['required', new PasscodeRule($actor)],
         ]);
 
         if ($validator->fails()) {
@@ -50,6 +48,6 @@ class EmailDeleteController implements RequestHandlerInterface
 
         $this->eventsDispatcher->dispatch(new UserTwoFactorUpdatedEvent($actor));
 
-        return new EmptyResponse();
+        return new EmptyResponse;
     }
 }

@@ -15,9 +15,7 @@ class TwoFactorController extends AbstractListController
 {
     public $serializer = TwoFactorSerializer::class;
 
-    public function __construct(protected UserRepository $users)
-    {
-    }
+    public function __construct(protected UserRepository $users) {}
 
     protected function data(ServerRequestInterface $request, Document $document)
     {
@@ -35,7 +33,7 @@ class TwoFactorController extends AbstractListController
             $actor = $this->users->findByIdentification($identification);
 
             if (is_null($actor) || ! $actor->checkPassword($password)) {
-                throw new NotAuthenticatedException();
+                throw new NotAuthenticatedException;
             }
         }
 

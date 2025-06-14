@@ -6,16 +6,16 @@ use Flarum\Http\RememberAccessToken;
 use Flarum\Http\SessionAccessToken;
 use Flarum\User\Exception\NotAuthenticatedException;
 use Flarum\User\UserRepository;
-use Illuminate\Support\Arr;
-use Laminas\Diactoros\Response\JsonResponse;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Illuminate\Contracts\Bus\Dispatcher as BusDispatcher;
 use Illuminate\Contracts\Events\Dispatcher as EventDispatcher;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
-use Nearata\TwoFactor\Rules\PasscodeRule;
+use Laminas\Diactoros\Response\JsonResponse;
 use Nearata\TwoFactor\Exceptions\TwoFactorLoginInitException;
+use Nearata\TwoFactor\Rules\PasscodeRule;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class CreateTokenController extends \Flarum\Api\Controller\CreateTokenController
 {
@@ -49,11 +49,11 @@ class CreateTokenController extends \Flarum\Api\Controller\CreateTokenController
 
             if (is_null($twofaCode)) {
                 $session->put('nearataTwoFactorValidated', 1);
-                throw new TwoFactorLoginInitException();
+                throw new TwoFactorLoginInitException;
             }
 
             $validator = $this->validationFactory->make(['2FACode' => $twofaCode], [
-                '2FACode' => ['required', new PasscodeRule($user)]
+                '2FACode' => ['required', new PasscodeRule($user)],
             ]);
 
             if ($validator->fails()) {
@@ -74,7 +74,7 @@ class CreateTokenController extends \Flarum\Api\Controller\CreateTokenController
 
         return new JsonResponse([
             'token' => $token->token,
-            'userId' => $user->id
+            'userId' => $user->id,
         ]);
     }
 }

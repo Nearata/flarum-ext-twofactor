@@ -12,16 +12,16 @@ use Nearata\TwoFactor\AppProvider;
 use Nearata\TwoFactor\RecoveryCodesProvider;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class PasscodeRule implements Rule, DataAwareRule, ValidatorAwareRule
+class PasscodeRule implements DataAwareRule, Rule, ValidatorAwareRule
 {
     protected array $data = [];
+
     protected Validator $validator;
+
     private bool $backupCodeUsed = false;
 
     public function __construct(
-        protected User $user)
-    {
-    }
+        protected User $user) {}
 
     public function passes($attribute, $value)
     {
@@ -36,6 +36,7 @@ class PasscodeRule implements Rule, DataAwareRule, ValidatorAwareRule
     public function setData($data)
     {
         $this->data = $data;
+
         return $this;
     }
 
@@ -48,6 +49,7 @@ class PasscodeRule implements Rule, DataAwareRule, ValidatorAwareRule
                 $this->user->twoFactorRecoveryCodes()->first()->delete();
             }
         });
+
         return $this;
     }
 

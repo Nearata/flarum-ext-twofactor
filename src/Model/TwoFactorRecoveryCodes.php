@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $user_id
  * @property string $code
  * @property \Carbon\Carbon $created_at
- *
  * @property-read User $user
  */
 class TwoFactorRecoveryCodes extends AbstractModel

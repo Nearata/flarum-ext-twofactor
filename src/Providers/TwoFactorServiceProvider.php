@@ -18,7 +18,7 @@ class TwoFactorServiceProvider extends AbstractServiceProvider
         $this->container->tag([
             AppProvider::class,
             EmailProvider::class,
-            RecoveryCodesProvider::class
+            RecoveryCodesProvider::class,
         ], 'nearata-twofactor.providers');
     }
 }

@@ -30,6 +30,7 @@ class AppProvider implements AbstractProvider
     public function withSecret(string $secret): self
     {
         $this->totp->setSecret($secret);
+
         return $this;
     }
 
@@ -42,6 +43,7 @@ class AppProvider implements AbstractProvider
     {
         $this->totp->setIssuer($this->settings->get('forum_title'));
         $this->totp->setLabel($actor->username);
+
         return $this->totp->getProvisioningUri();
     }
 }

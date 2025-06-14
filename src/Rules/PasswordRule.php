@@ -8,9 +8,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class PasswordRule implements Rule
 {
-    public function __construct(protected User $user)
-    {
-    }
+    public function __construct(protected User $user) {}
 
     public function passes($attribute, $value)
     {

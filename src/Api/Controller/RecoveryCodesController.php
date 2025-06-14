@@ -16,7 +16,7 @@ class RecoveryCodesController implements RequestHandlerInterface
         $actor->assertRegistered();
 
         return new JsonResponse([
-            'exists' => $actor->twoFactorRecoveryCodes()->exists()
+            'exists' => $actor->twoFactorRecoveryCodes()->exists(),
         ]);
     }
 }

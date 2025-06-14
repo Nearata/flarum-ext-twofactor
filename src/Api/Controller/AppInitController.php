@@ -12,9 +12,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class AppInitController implements RequestHandlerInterface
 {
-    public function __construct(protected AppProvider $appProvider)
-    {
-    }
+    public function __construct(protected AppProvider $appProvider) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -22,7 +20,7 @@ class AppInitController implements RequestHandlerInterface
         $actor->assertRegistered();
 
         if ($actor->twoFactor()->where('type', 'app')->exists() || $actor->cannot('nearata-twofactor.enable')) {
-            throw new PermissionDeniedException();
+            throw new PermissionDeniedException;
         }
 
         return new JsonResponse([

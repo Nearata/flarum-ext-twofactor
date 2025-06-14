@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $type
  * @property string|null $secret
  * @property \Carbon\Carbon $created_at
- *
  * @property-read User $user
  */
 class TwoFactor extends AbstractModel

@@ -31,7 +31,7 @@ class EmailSendCodeNotificationJob extends AbstractJob
             compact('blueprint', 'user'),
             function (Message $message) use ($translator) {
                 $message->to($this->email, $this->recipient->display_name)
-                        ->subject($this->blueprint->getEmailSubject($translator));
+                    ->subject($this->blueprint->getEmailSubject($translator));
             }
         );
     }

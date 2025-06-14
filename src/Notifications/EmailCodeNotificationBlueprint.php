@@ -11,9 +11,7 @@ class EmailCodeNotificationBlueprint implements BlueprintInterface, MailableInte
 {
     public function __construct(
         protected User $user,
-        protected string $passcode)
-    {
-    }
+        protected string $passcode) {}
 
     public function passcode(): string
     {
@@ -37,7 +35,7 @@ class EmailCodeNotificationBlueprint implements BlueprintInterface, MailableInte
 
     public static function getType()
     {
-        return "twoFactorEmailPasscode";
+        return 'twoFactorEmailPasscode';
     }
 
     public static function getSubjectModel()
@@ -49,7 +47,7 @@ class EmailCodeNotificationBlueprint implements BlueprintInterface, MailableInte
     {
         return [
             'text' => 'nearata-twofactor::emails.email_sendcode_plain',
-            'html' => 'nearata-twofactor::emails.email_sendcode'
+            'html' => 'nearata-twofactor::emails.email_sendcode',
         ];
     }
 
