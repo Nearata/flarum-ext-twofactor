@@ -14,13 +14,13 @@ class LogInController extends \Flarum\Forum\Controller\LogInController
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $body = $request->getParsedBody();
-        $params = Arr::only($body, ['identification', 'password', 'remember', '2FAType', '2FACode']);
+        $params = Arr::only($body, ['identification', 'password', 'remember', '2FACode']);
 
         /** @var \Illuminate\Session\Store */
         $session = $request->getAttribute('session');
 
         // in-case of page refresh
-        if (! Arr::has($params, '2FAType')) {
+        if (! Arr::has($params, '2FACode')) {
             $session->forget('nearataTwoFactorValidated');
         }
 
