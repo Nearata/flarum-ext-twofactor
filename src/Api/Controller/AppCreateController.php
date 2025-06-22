@@ -4,7 +4,7 @@ namespace Nearata\TwoFactor\Api\Controller;
 
 use Flarum\Http\RequestUtil;
 use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
-use Illuminate\Contracts\Validation\Factory as validationFactory;
+use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
@@ -21,7 +21,7 @@ class AppCreateController implements RequestHandlerInterface
 {
     public function __construct(
         protected AppProvider $appProvider,
-        protected validationFactory $validationFactory,
+        protected ValidationFactory $validationFactory,
         protected EventsDispatcher $eventsDispatcher) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface

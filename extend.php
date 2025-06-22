@@ -17,10 +17,12 @@ use Nearata\TwoFactor\Api\Controller\RecoveryCodesController;
 use Nearata\TwoFactor\Api\Controller\RecoveryCodesCreateController;
 use Nearata\TwoFactor\Api\Controller\RecoveryCodesDeleteController;
 use Nearata\TwoFactor\Api\Controller\TwoFactorController;
+use Nearata\TwoFactor\Api\Controller\TwoFactorValidateController;
 use Nearata\TwoFactor\Api\Serializer\TwoFactorSerializer;
 use Nearata\TwoFactor\Forum\Controller\LogInController;
 use Nearata\TwoFactor\Listeners\UserTwoFactorUpdatedEvent;
 use Nearata\TwoFactor\Listeners\UserTwoFactorUpdatedListener;
+use Nearata\TwoFactor\Middleware\TwoFactorMiddleware;
 use Nearata\TwoFactor\Model\TwoFactor;
 use Nearata\TwoFactor\Model\TwoFactorRecoveryCodes;
 use Nearata\TwoFactor\Providers\TwoFactorServiceProvider;
@@ -48,7 +50,9 @@ return [
         ->post('/nearata/twofactor/email/sendCode', 'nearata-twofactor.email-sendcode', EmailSendCodeController::class)
         ->post('/nearata/twofactor/recoveryCodes', 'nearata-twofactor.recoverycodes-create', RecoveryCodesCreateController::class)
         ->get('/nearata/twofactor/recoveryCodes', 'nearata-twofactor.recoverycodes', RecoveryCodesController::class)
-        ->delete('/nearata/twofactor/recoveryCodes', 'nearata-twofactor.recoverycodes-delete', RecoveryCodesDeleteController::class),
+        ->delete('/nearata/twofactor/recoveryCodes', 'nearata-twofactor.recoverycodes-delete', RecoveryCodesDeleteController::class)
+        ->post('/nearata/twofactor/validate', 'nearata-twofactor.validate', TwoFactorValidateController::class)
+        ->get('/nearata/twofactor/validate', 'nearata-twofactor.validate-check', TwoFactorValidateController::class),
 
     (new Extend\Routes('forum'))
         ->remove('login')
@@ -78,7 +82,10 @@ return [
         ->namespace('nearata-twofactor', __DIR__.'/views'),
 
     (new Extend\Event)
-        ->listen(UserTwoFactorUpdatedEvent::class, UserTwoFactorUpdatedListener::class)
+        ->listen(UserTwoFactorUpdatedEvent::class, UserTwoFactorUpdatedListener::class),
+
+    (new Extend\Middleware('api'))
+        ->add(TwoFactorMiddleware::class)
 
     //(new Extend\Notification)
         //->type(EmailCodeNotificationBlueprint::class, BasicUserSerializer::class, ['email'])

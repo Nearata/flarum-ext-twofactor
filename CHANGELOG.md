@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add authentication by email [issue #6](https://github.com/Nearata/flarum-ext-twofactor/issues/6)
 - backup codes no longer depend on the authenticator app, no longer auto-generate, user dependant
 - fire `UserTwoFactorUpdatedEvent` on user two factor updates
+- require 2fa for change password, change email
 
 ## [2.2.1] - 2023-06-18
 

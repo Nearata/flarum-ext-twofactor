@@ -1,5 +1,4 @@
 import { forumTranslator as trans } from "../helpers/trans";
-import TwoFactor from "../models/TwoFactor";
 import { providers } from "./Providers";
 import RecoverySetupModal from "./RecoverySetupModal";
 import Component from "flarum/common/Component";
@@ -10,6 +9,7 @@ import icon from "flarum/common/helpers/icon";
 import ItemList from "flarum/common/utils/ItemList";
 import app from "flarum/forum/app";
 import type Mithril from "mithril";
+import { updateStore } from "../utils/updateStore";
 
 export default class TwoFactorItems extends Component {
   loading = true;
@@ -17,21 +17,10 @@ export default class TwoFactorItems extends Component {
   oninit(vnode: Mithril.Vnode<this>): void {
     super.oninit(vnode);
 
-    app.store
-      .find<TwoFactor[]>("nearata/twofactor")
-      .then((r) => {
-        const lst = r.map((val) => val.type());
-
-        for (const i of app.store.all<TwoFactor>("twoFactor")) {
-          if (!lst.includes(i.type())) {
-            app.store.remove(i);
-          }
-        }
-      })
-      .finally(() => {
-        this.loading = false;
-        m.redraw();
-      });
+    updateStore().finally(() => {
+      this.loading = false;
+      m.redraw();
+    });
   }
 
   view(_: Mithril.Vnode<this>) {

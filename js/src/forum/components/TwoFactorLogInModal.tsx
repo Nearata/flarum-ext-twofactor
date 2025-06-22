@@ -43,7 +43,7 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
     }
 
     return (
-      <div class="Modal-body">
+      <div className="Modal-body">
         <div className="LogInButtons">
           {this.types.length > 1 &&
             providers
@@ -62,7 +62,7 @@ export default class TwoFactorLogInModal extends Modal<Attrs> {
                 );
               })}
         </div>
-        <div class="Form Form--centered">
+        <div className="Form Form--centered">
           <fieldset disabled={this.loading || this.type() === ""}>
             <FormPasscode bidi={this.passcode} />
             <FormButtonSubmit loading={this.loading}>

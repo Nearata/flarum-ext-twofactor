@@ -6,7 +6,6 @@ use Flarum\Http\RequestUtil;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\Exception\NotAuthenticatedException;
 use Flarum\User\UserRepository;
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 use Illuminate\Support\Arr;
@@ -23,7 +22,6 @@ class EmailSendCodeController implements RequestHandlerInterface
 {
     public function __construct(
         protected UserRepository $users,
-        protected CacheRepository $cache,
         protected SettingsRepositoryInterface $settings,
         protected EmailProvider $emailProvider,
         protected Queue $queue,

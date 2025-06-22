@@ -67,7 +67,7 @@ nearata-twofactor:
       recovery_confirm_message: Are you sure? Your old codes won't work anymore.
     login:
       title: Two-Factor Authentication
-      submit_button_label: Log In
+      submit_button_label: Verify
   email:
     email_auth_subject: Your two-factor authentication code
     email_auth_body: |
