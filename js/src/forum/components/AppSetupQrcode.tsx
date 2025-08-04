@@ -1,18 +1,12 @@
 import { forumTranslator as trans } from "../helpers/trans";
-import AppSetupState from "../states/AppSetupState";
 import load from "external-load";
 import Component from "flarum/common/Component";
 import LoadingIndicator from "flarum/common/components/LoadingIndicator";
 import type Mithril from "mithril";
+import { Attrs } from "./AppSetupModal";
 
-export default class AppSetupQrcode extends Component {
+export default class AppSetupQrcode extends Component<Attrs> {
   loading = true;
-  setupState!: AppSetupState;
-
-  oninit(vnode: Mithril.Vnode<this>): void {
-    super.oninit(vnode);
-    this.setupState = vnode.attrs.setupState;
-  }
 
   oncreate(vnode: Mithril.VnodeDOM<this>): void {
     super.oncreate(vnode);
@@ -27,20 +21,13 @@ export default class AppSetupQrcode extends Component {
     return (
       <>
         <p>{trans("settings.app_setup_scan_qr")}</p>
-        <p>
-          <canvas className="QRCode" oncreate={this.render.bind(this)}></canvas>
-        </p>
-        {this.setupState.manually ? (
-          <p className="message">
-            <code>{this.setupState.secret}</code>
-          </p>
-        ) : (
-          <a onclick={() => (this.setupState.manually = true)}>
-            {trans("settings.app_setup_enter_code_manually")}
-          </a>
-        )}
+        <p><canvas className="QRCode" oncreate={this.render.bind(this)}></canvas></p>
       </>
     );
+  }
+
+  get setupState() {
+    return this.attrs.setupState;
   }
 
   async load() {

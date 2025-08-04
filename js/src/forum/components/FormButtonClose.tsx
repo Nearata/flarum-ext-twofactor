@@ -1,6 +1,5 @@
 import { forumTranslator as trans } from "../helpers/trans";
 import Button from "flarum/common/components/Button";
-import app from "flarum/forum/app";
 import type Mithril from "mithril";
 
 export default class FormButtonClose extends Button {

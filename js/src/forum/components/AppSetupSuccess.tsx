@@ -1,24 +1,18 @@
 import { forumTranslator as trans } from "../helpers/trans";
-import AppSetupState from "../states/AppSetupState";
 import Component from "flarum/common/Component";
 import type Mithril from "mithril";
+import { Attrs } from "./AppSetupModal";
 
-export default class AppSetupSuccess extends Component {
+export default class AppSetupSuccess extends Component<Attrs> {
   loading = true;
-  setupState!: AppSetupState;
-
-  oninit(vnode: Mithril.Vnode<this>): void {
-    super.oninit(vnode);
-    this.setupState = vnode.attrs.setupState;
-  }
 
   view(_: Mithril.Vnode<this>) {
     return (
       <>
-        {this.setupState.enabled && (
+        {this.attrs.setupState.enabled && (
           <p>{trans("settings.app_setup_success_enable")}</p>
         )}
-        {!this.setupState.enabled &&
+        {!this.attrs.setupState.enabled &&
           trans("settings.app_setup_success_disable")}
       </>
     );

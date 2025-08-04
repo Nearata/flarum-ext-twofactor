@@ -5,12 +5,12 @@ type Attrs = {
   disabled: boolean;
 };
 
-export default class Form extends Component {
-  view(vnode: Mithril.Vnode<Attrs, this>) {
+export default class Form extends Component<Attrs> {
+  view(vnode: Mithril.Vnode<this>) {
     return (
       <div className="Modal-body">
         <div className="Form Form--centered">
-          <fieldset disabled={vnode.attrs.disabled}>{vnode.children}</fieldset>
+          <fieldset disabled={this.attrs.disabled}>{vnode.children}</fieldset>
         </div>
       </div>
     );

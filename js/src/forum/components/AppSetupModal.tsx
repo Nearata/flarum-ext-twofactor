@@ -12,6 +12,11 @@ import Modal from "flarum/common/components/Modal";
 import RequestError from "flarum/common/utils/RequestError";
 import app from "flarum/forum/app";
 import type Mithril from "mithril";
+import AppSetupNoQrcode from "./AppSetupNoQrcode";
+
+export type Attrs = {
+  setupState: AppSetupState
+}
 
 export default class AppSetupModal extends Modal {
   protected static readonly isDismissibleViaEscKey: boolean = false;
@@ -43,9 +48,10 @@ export default class AppSetupModal extends Modal {
           {this.setupState.success && (
             <AppSetupSuccess setupState={this.setupState} />
           )}
-          {!this.setupState.success && !this.setupState.enabled && (
-            <AppSetupQrcode setupState={this.setupState} />
-          )}
+          {!this.setupState.success && !this.setupState.enabled && [
+            <AppSetupQrcode setupState={this.setupState} />,
+            <AppSetupNoQrcode setupState={this.setupState} />
+          ]}
           {!this.setupState.success && this.setupState.enabled && (
             <p>{trans("settings.app_setup_enter_code_disable")}</p>
           )}
